@@ -1,10 +1,12 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { Search, User, ChevronRight, Eye, EyeOff, Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, CheckCircle, FileText } from 'lucide-react';
 import { MockApiService } from '../../data/api/MockApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import type { Voto } from '../../domain/voto';
 
-export const MeusVotosPage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
+export const MeusVotosPage: React.FC = () => {
+    const navigate = useNavigate();
     const [votos, setVotos] = useState<Voto[]>([]);
     const [loading, setLoading] = useState(true);
     const [hashVisivel, setHashVisivel] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export const MeusVotosPage: React.FC<{ onNavigate: (page: string) => void }> = (
                         </div>
                     </div>
                     <button
-                        onClick={() => onNavigate('dashboard')}
+                        onClick={() => navigate('/dashboard')}
                         className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
                     >
                         Voltar

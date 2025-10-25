@@ -1,9 +1,11 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { Search, User, ChevronRight, Eye, EyeOff, Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User } from 'lucide-react';
 import { GovButton } from '../components/govButton';
 import { useAuth } from '../../contexts/AuthContext';
 
-export const LoginPage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
+export const LoginPage: React.FC = () => {
+    const navigate = useNavigate();
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ export const LoginPage: React.FC<{ onNavigate: (page: string) => void }> = ({ on
         setLoading(true);
         try {
             await login(cpf, senha);
-            onNavigate('dashboard');
+            navigate('/dashboard');
         } catch (error) {
             alert('Erro ao fazer login');
         } finally {
@@ -38,7 +40,7 @@ export const LoginPage: React.FC<{ onNavigate: (page: string) => void }> = ({ on
             {/* Header */}
             <header className="bg-[#071D41] text-white py-4">
                 <div className="max-w-7xl mx-auto px-4">
-                    <button onClick={() => onNavigate('home')} className="flex items-center gap-3 hover:opacity-80 transition">
+                    <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
                         <div className="w-10 h-10 bg-[#1351B4] rounded flex items-center justify-center font-bold text-xl">
                             V
                         </div>

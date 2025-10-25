@@ -1,11 +1,13 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { Search, User, ChevronRight, Eye, EyeOff, Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRight, Calendar } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import { GovButton } from '../components/govButton';
 
-export const DashboardPage: React.FC<{ onNavigate: (page: string, eleicaoId?: string) => void }> = ({ onNavigate }) => {
+export const DashboardPage: React.FC = () => {
+    const navigate = useNavigate();
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);
     const { usuario, logout } = useAuth();
@@ -52,13 +54,13 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string, eleicaoId?: st
                     </div>
                     <div className="flex gap-3">
                         <button
-                            onClick={() => onNavigate('meus-votos')}
+                            onClick={() => navigate('/meus-votos')}
                             className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
                         >
                             Meus Votos
                         </button>
                         <button
-                            onClick={() => { logout(); onNavigate('home'); }}
+                            onClick={() => { logout(); navigate('/'); }}
                             className="px-4 py-2 bg-white text-[#071D41] rounded hover:bg-gray-100 transition text-sm"
                         >
                             Sair
@@ -96,7 +98,7 @@ export const DashboardPage: React.FC<{ onNavigate: (page: string, eleicaoId?: st
                                 </div>
 
                                 {eleicao.status === 'ativa' && (
-                                    <GovButton onClick={() => onNavigate('votar', eleicao.id)}>
+                                    <GovButton onClick={() => navigate(`/votar/${eleicao.id}`)}>
                                         Votar Agora
                                         <ChevronRight size={18} />
                                     </GovButton>

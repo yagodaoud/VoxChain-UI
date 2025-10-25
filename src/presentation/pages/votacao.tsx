@@ -1,9 +1,12 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import type { Candidato } from '../../domain/candidato';
 
-export const VotacaoPage: React.FC<{ eleicaoId: string; onNavigate: (page: string) => void }> = ({ eleicaoId, onNavigate }) => {
+export const VotacaoPage: React.FC = () => {
+    const { eleicaoId } = useParams<{ eleicaoId: string }>();
+    const navigate = useNavigate();
     const [eleicao, setEleicao] = useState<Eleicao | null>(null);
     const [categoriaAtual, setCategoriaAtual] = useState(0);
     const [numeroDigitado, setNumeroDigitado] = useState('');
@@ -42,6 +45,7 @@ export const VotacaoPage: React.FC<{ eleicaoId: string; onNavigate: (page: strin
 
         setVotando(true);
         try {
+            if (!eleicaoId) return;
             await api.registrarVoto(eleicaoId, categoria.id, numeroDigitado);
 
             if (categoriaAtual < (eleicao?.categorias.length || 0) - 1) {
@@ -49,7 +53,7 @@ export const VotacaoPage: React.FC<{ eleicaoId: string; onNavigate: (page: strin
                 handleCorrige();
             } else {
                 alert('Votação concluída com sucesso!');
-                onNavigate('dashboard');
+                navigate('/dashboard');
             }
         } catch (error) {
             alert('Erro ao registrar voto');
@@ -131,7 +135,7 @@ export const VotacaoPage: React.FC<{ eleicaoId: string; onNavigate: (page: strin
 
                 <div className="mt-6 text-center">
                     <button
-                        onClick={() => onNavigate('dashboard')}
+                        onClick={() => navigate('/dashboard')}
                         className="text-[#1351B4] hover:underline"
                     >
                         ← Voltar ao Dashboard

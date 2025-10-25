@@ -1,8 +1,10 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { Search, User, ChevronRight, Eye, EyeOff, Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, ChevronRight, CheckCircle, FileText } from 'lucide-react';
 import { GovButton } from '../components/govButton';
 
-export const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
+export const HomePage: React.FC = () => {
+    const navigate = useNavigate();
     return (
         <div className="min-h-screen bg-white">
             {/* Header Gov.br */}
@@ -17,7 +19,7 @@ export const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onN
                             <div className="text-xs text-gray-300">Sistema de Votação em Blockchain</div>
                         </div>
                     </div>
-                    <GovButton onClick={() => onNavigate('login')}>
+                    <GovButton onClick={() => navigate('/login')}>
                         <User size={18} />
                         Entrar com gov.br
                     </GovButton>
@@ -37,7 +39,7 @@ export const HomePage: React.FC<{ onNavigate: (page: string) => void }> = ({ onN
                         Sistema de votação eletrônica baseado em blockchain. Seus votos são registrados de forma imutável,
                         auditável e completamente transparente.
                     </p>
-                    <GovButton onClick={() => onNavigate('login')} variant="secondary">
+                    <GovButton onClick={() => navigate('/login')} variant="secondary">
                         Acessar Minha Conta
                         <ChevronRight size={20} />
                     </GovButton>

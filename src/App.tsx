@@ -1,4 +1,5 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MockApiService } from './data/api/MockApiService';
 import type { Usuario } from './domain/usuario';
 import { AuthContext, type AuthContextType } from './contexts/AuthContext'
@@ -9,15 +10,8 @@ import { DashboardPage } from '../src/presentation/pages/dashboard'
 import { MeusVotosPage } from '../src/presentation/pages/meus-votos'
 
 function App() {
-    const [currentPage, setCurrentPage] = useState('home');
     const [usuario, setUsuario] = useState<Usuario | null>(null);
-    const [eleicaoSelecionada, setEleicaoSelecionada] = useState<string>('');
     const api = new MockApiService();
-
-    const handleNavigate = (page: string, eleicaoId?: string) => {
-        setCurrentPage(page);
-        if (eleicaoId) setEleicaoSelecionada(eleicaoId);
-    };
 
     const handleLogin = async (cpf: string, senha: string) => {
         const user = await api.autenticar(cpf, senha);
@@ -26,7 +20,6 @@ function App() {
 
     const handleLogout = () => {
         setUsuario(null);
-        setCurrentPage('home');
     };
 
     const authValue: AuthContextType = {
@@ -37,14 +30,25 @@ function App() {
     };
 
     return (
-        <AuthContext.Provider value={authValue} >
-            {currentPage === 'home' && <HomePage onNavigate={handleNavigate} />
-            }
-            {currentPage === 'login' && <HomePage onNavigate={handleNavigate} />}
-            {currentPage === 'login' && <LoginPage onNavigate={handleNavigate} />}
-            {currentPage === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
-            {currentPage === 'votar' && <VotacaoPage eleicaoId={eleicaoSelecionada} onNavigate={handleNavigate} />}
-            {currentPage === 'meus-votos' && <MeusVotosPage onNavigate={handleNavigate} />}
+        <AuthContext.Provider value={authValue}>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route 
+                        path="/dashboard" 
+                        element={usuario ? <DashboardPage /> : <Navigate to="/login" replace />} 
+                    />
+                    <Route 
+                        path="/votar/:eleicaoId" 
+                        element={usuario ? <VotacaoPage /> : <Navigate to="/login" replace />} 
+                    />
+                    <Route 
+                        path="/meus-votos" 
+                        element={usuario ? <MeusVotosPage /> : <Navigate to="/login" replace />} 
+                    />
+                </Routes>
+            </Router>
         </AuthContext.Provider>
     );
 }
