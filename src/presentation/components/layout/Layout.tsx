@@ -24,7 +24,7 @@ export const Layout: React.FC<LayoutProps> = ({
     className = ''
 }) => {
     return (
-        <div className={`min-h-screen bg-white ${className}`}>
+        <div className={`min-h-screen bg-white flex flex-col ${className}`}>
             {showHeader && (
                 <Header
                     showUserActions={showUserActions}
@@ -37,7 +37,10 @@ export const Layout: React.FC<LayoutProps> = ({
             {/* Barra azul */}
             <div className="bg-[#1351B4] h-2"></div>
 
-            {children}
+            {/* Conteúdo principal - flex-1 faz com que ocupe todo o espaço disponível */}
+            <div className="flex-1">
+                {children}
+            </div>
 
             {showFooter && <Footer />}
         </div>
