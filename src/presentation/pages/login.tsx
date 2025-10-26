@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard } from '../components';
@@ -9,7 +9,14 @@ export const LoginPage: React.FC = () => {
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, isAuthenticated } = useAuth();
+
+    // Redireciona se já estiver logado
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [isAuthenticated, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

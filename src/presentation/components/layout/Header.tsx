@@ -39,9 +39,18 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
 
                 {showUserActions && (
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-3">
                         {usuario ? (
                             <>
+                                <div className="text-sm text-gray-200 hidden sm:block">
+                                    Olá, {usuario.nome}
+                                </div>
+                                <button
+                                    onClick={() => navigate('/dashboard')}
+                                    className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
+                                >
+                                    Dashboard
+                                </button>
                                 <button
                                     onClick={() => navigate('/meus-votos')}
                                     className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"

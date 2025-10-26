@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, ChevronRight, CheckCircle, FileText } from 'lucide-react';
 import { Layout, GovButton, Card } from '../components';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const HomePage: React.FC = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+
+    // Redireciona usuários logados para o dashboard
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [isAuthenticated, navigate]);
     return (
         <Layout showUserActions={true}>
 
