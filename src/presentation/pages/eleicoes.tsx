@@ -6,7 +6,7 @@ import { MockApiService } from '../../data/api/MockApiService';
 import { Layout, GovButton, Loading, StatusBadge, Card } from '../components';
 import { formatarDataBrasileira } from '../../utils/dateUtils';
 
-export const DashboardPage: React.FC = () => {
+export const EleicoesPage: React.FC = () => {
     const navigate = useNavigate();
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);

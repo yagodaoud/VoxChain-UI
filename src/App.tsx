@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { HomePage } from '../src/presentation/pages/home'
 import { LoginPage } from '../src/presentation/pages/login'
 import { VotacaoPage } from '../src/presentation/pages/votacao'
-import { DashboardPage } from '../src/presentation/pages/dashboard'
+import { EleicoesPage } from '../src/presentation/pages/eleicoes'
 import { MeusVotosPage } from '../src/presentation/pages/meus-votos'
 
 // Componente para rotas protegidas
@@ -19,29 +19,29 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route 
-                    path="/dashboard" 
+                <Route
+                    path="/eleicoes"
                     element={
                         <ProtectedRoute>
-                            <DashboardPage />
+                            <EleicoesPage />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/votar/:eleicaoId" 
+                <Route
+                    path="/votar/:eleicaoId"
                     element={
                         <ProtectedRoute>
                             <VotacaoPage />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/meus-votos" 
+                <Route
+                    path="/meus-votos"
                     element={
                         <ProtectedRoute>
                             <MeusVotosPage />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
             </Routes>
         </Router>

@@ -46,10 +46,10 @@ export const Header: React.FC<HeaderProps> = ({
                                     Olá, {usuario.nome}
                                 </div>
                                 <button
-                                    onClick={() => navigate('/dashboard')}
+                                    onClick={() => navigate('/eleicoes')}
                                     className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
                                 >
-                                    Dashboard
+                                    Eleições
                                 </button>
                                 <button
                                     onClick={() => navigate('/meus-votos')}

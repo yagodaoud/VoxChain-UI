@@ -67,12 +67,12 @@ export const VotacaoPage: React.FC = () => {
 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
-        navigate('/dashboard');
+        navigate('/eleicoes');
     };
 
     if (loading) {
         return (
-            <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/dashboard" backLabel="Voltar ao Dashboard">
+            <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/eleicoes" backLabel="Voltar às Eleições">
                 <div className="max-w-4xl mx-auto px-4 py-8">
                     <Loading text="Carregando eleição..." />
                 </div>
@@ -82,7 +82,7 @@ export const VotacaoPage: React.FC = () => {
 
     if (!eleicao) {
         return (
-            <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/dashboard" backLabel="Voltar ao Dashboard">
+            <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/eleicoes" backLabel="Voltar às Eleições">
                 <div className="max-w-4xl mx-auto px-4 py-8">
                     <div className="text-center">
                         <h1 className="text-2xl font-bold text-gray-800 mb-4">Eleição não encontrada</h1>
@@ -98,7 +98,7 @@ export const VotacaoPage: React.FC = () => {
                 {/* Botão de voltar sutil */}
                 <div className="mb-4">
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/eleicoes')}
                         className="text-[#1351B4] hover:underline text-sm font-medium"
                     >
                         ← Voltar

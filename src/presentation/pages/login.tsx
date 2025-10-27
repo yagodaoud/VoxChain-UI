@@ -14,7 +14,7 @@ export const LoginPage: React.FC = () => {
     // Redireciona se já estiver logado
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard');
+            navigate('/eleicoes');
         }
     }, [isAuthenticated, navigate]);
 
@@ -23,7 +23,7 @@ export const LoginPage: React.FC = () => {
         setLoading(true);
         try {
             await login(cpf, senha);
-            navigate('/dashboard');
+            navigate('/eleicoes');
         } catch (error) {
             alert('Erro ao fazer login');
         } finally {

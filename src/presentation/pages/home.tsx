@@ -8,10 +8,10 @@ export const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
 
-    // Redireciona usuários logados para o dashboard
+    // Redireciona usuários logados para as eleições
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard');
+            navigate('/eleicoes');
         }
     }, [isAuthenticated, navigate]);
     return (

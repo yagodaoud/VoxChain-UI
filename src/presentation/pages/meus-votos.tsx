@@ -58,8 +58,8 @@ export const MeusVotosPage: React.FC = () => {
     return (
         <Layout
             showBackButton={true}
-            backPath="/dashboard"
-            backLabel="Voltar ao dashboard"
+            backPath="/eleicoes"
+            backLabel="Voltar às eleições"
             className="bg-[#F8F9FA]"
         >
             <div className="max-w-7xl mx-auto px-4 py-8">

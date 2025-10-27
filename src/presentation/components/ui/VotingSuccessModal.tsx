@@ -25,7 +25,7 @@ export const VotingSuccessModal: React.FC<VotingSuccessModalProps> = ({
             onClose={onClose}
             title={title}
             message={message}
-            confirmText="Voltar ao Dashboard"
+            confirmText="Voltar às Eleições"
             showAnimation={true}
             onConfirm={onConfirm}
         />
