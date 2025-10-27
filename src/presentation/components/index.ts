@@ -6,3 +6,6 @@ export * from './ui';
 
 // Form components
 export * from './forms';
+
+// Voting components
+export * from './voting';
