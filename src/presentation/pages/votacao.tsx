@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import type { Candidato } from '../../domain/candidato';
-import { Layout, Loading, ElectionHeader, ElectronicBallot } from '../components';
+import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal } from '../components';
 
 export const VotacaoPage: React.FC = () => {
     const { eleicaoId } = useParams<{ eleicaoId: string }>();
@@ -14,6 +14,7 @@ export const VotacaoPage: React.FC = () => {
     const [candidatoSelecionado, setCandidatoSelecionado] = useState<Candidato | null>(null);
     const [votando, setVotando] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const api = new MockApiService();
 
     useEffect(() => {
@@ -55,14 +56,18 @@ export const VotacaoPage: React.FC = () => {
                 setCategoriaAtual(categoriaAtual + 1);
                 handleCorrige();
             } else {
-                alert('Votação concluída com sucesso!');
-                navigate('/dashboard');
+                setShowSuccessModal(true);
             }
         } catch (error) {
             alert('Erro ao registrar voto');
         } finally {
             setVotando(false);
         }
+    };
+
+    const handleSuccessModalClose = () => {
+        setShowSuccessModal(false);
+        navigate('/dashboard');
     };
 
     if (loading) {
@@ -114,6 +119,14 @@ export const VotacaoPage: React.FC = () => {
                     votando={votando}
                 />
             </div>
+
+            {/* Modal de Sucesso */}
+            <VotingSuccessModal
+                isOpen={showSuccessModal}
+                onClose={handleSuccessModalClose}
+                eleicaoNome={eleicao?.nome}
+                onConfirm={handleSuccessModalClose}
+            />
         </Layout>
     );
 };
