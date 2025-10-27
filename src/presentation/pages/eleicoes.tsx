@@ -4,7 +4,8 @@ import { ChevronRight, Calendar } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import { Layout, GovButton, Loading, StatusBadge, Card } from '../components';
-import { formatarDataBrasileira } from '../../utils/dateUtils';
+import { ElectionTimer } from '../components/voting';
+import { formatarDataHoraLegivel } from '../../utils/dateUtils';
 
 export const EleicoesPage: React.FC = () => {
     const navigate = useNavigate();
@@ -33,17 +34,26 @@ export const EleicoesPage: React.FC = () => {
                         {eleicoes.map(eleicao => (
                             <Card key={eleicao.id} hover>
                                 <div className="flex items-start justify-between mb-4">
-                                    <div>
+                                    <div className="flex-1">
                                         <h2 className="text-xl font-bold text-gray-800 mb-2">{eleicao.nome}</h2>
                                         <p className="text-gray-600 text-sm mb-3">{eleicao.descricao}</p>
-                                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar size={16} />
-                                                {formatarDataBrasileira(eleicao.dataInicio)} - {formatarDataBrasileira(eleicao.dataFim)}
+                                        <div className="flex items-center gap-4 text-base text-gray-500">
+                                            <span className="flex items-center gap-2">
+                                                <Calendar size={18} />
+                                                <span className="font-semibold">
+                                                    {formatarDataHoraLegivel(eleicao.dataInicio)} - {formatarDataHoraLegivel(eleicao.dataFim)}
+                                                </span>
                                             </span>
                                         </div>
                                     </div>
-                                    <StatusBadge status={eleicao.status as 'ativa' | 'futura' | 'encerrada'} />
+                                    <div className="flex flex-col items-end gap-3">
+                                        <StatusBadge status={eleicao.status as 'ativa' | 'futura' | 'encerrada'} />
+                                        <ElectionTimer
+                                            dataInicio={eleicao.dataInicio}
+                                            dataFim={eleicao.dataFim}
+                                            status={eleicao.status}
+                                        />
+                                    </div>
                                 </div>
 
                                 {eleicao.status === 'ativa' && (
