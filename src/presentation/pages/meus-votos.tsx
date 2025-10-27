@@ -4,6 +4,7 @@ import { MockApiService } from '../../data/api/MockApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import type { Voto } from '../../domain/voto';
 import { Layout, Loading, EmptyState, Card } from '../components';
+import { formatarDataBrasileira } from '../../utils/dateUtils';
 
 export const MeusVotosPage: React.FC = () => {
     const [votos, setVotos] = useState<Voto[]>([]);
@@ -49,7 +50,7 @@ export const MeusVotosPage: React.FC = () => {
                                         <p className="text-sm text-gray-600 mt-1">{voto.categoriaNome}</p>
                                     </div>
                                     <span className="text-xs text-gray-500">
-                                        {voto.timestamp.toLocaleDateString()}
+                                        {formatarDataBrasileira(voto.timestamp)}
                                     </span>
                                 </div>
 

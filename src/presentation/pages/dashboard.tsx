@@ -4,6 +4,7 @@ import { ChevronRight, Calendar } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import { Layout, GovButton, Loading, StatusBadge, Card } from '../components';
+import { formatarDataBrasileira } from '../../utils/dateUtils';
 
 export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ export const DashboardPage: React.FC = () => {
                                         <div className="flex items-center gap-4 text-sm text-gray-500">
                                             <span className="flex items-center gap-1">
                                                 <Calendar size={16} />
-                                                {eleicao.dataInicio.toLocaleDateString()} - {eleicao.dataFim.toLocaleDateString()}
+                                                {formatarDataBrasileira(eleicao.dataInicio)} - {formatarDataBrasileira(eleicao.dataFim)}
                                             </span>
                                         </div>
                                     </div>
