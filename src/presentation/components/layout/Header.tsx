@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { GovButton } from '../ui';
@@ -18,7 +18,28 @@ export const Header: React.FC<HeaderProps> = ({
     backLabel = 'Voltar para home'
 }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { usuario, logout } = useAuth();
+
+    // Função para verificar se o botão está ativo
+    const isActive = (path: string) => {
+        if (path === '/eleicoes') {
+            return location.pathname === '/eleicoes';
+        }
+        if (path === '/meus-votos') {
+            return location.pathname === '/meus-votos';
+        }
+        return false;
+    };
+
+    // Função para obter as classes CSS do botão
+    const getButtonClasses = (path: string) => {
+        const baseClasses = "px-4 py-2 rounded transition text-sm";
+        const activeClasses = "bg-[#1351B4] text-white font-semibold ring-2 ring-white ring-opacity-50";
+        const inactiveClasses = "bg-[#1351B4] hover:bg-[#0c3d8a] text-white";
+
+        return `${baseClasses} ${isActive(path) ? activeClasses : inactiveClasses}`;
+    };
 
     return (
         <header className="bg-[#071D41] text-white">
@@ -47,13 +68,13 @@ export const Header: React.FC<HeaderProps> = ({
                                 </div>
                                 <button
                                     onClick={() => navigate('/eleicoes')}
-                                    className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
+                                    className={getButtonClasses('/eleicoes')}
                                 >
                                     Eleições
                                 </button>
                                 <button
                                     onClick={() => navigate('/meus-votos')}
-                                    className="px-4 py-2 bg-[#1351B4] rounded hover:bg-[#0c3d8a] transition text-sm"
+                                    className={getButtonClasses('/meus-votos')}
                                 >
                                     Meus Votos
                                 </button>
