@@ -32,15 +32,41 @@ export class MockApiService {
                         nome: 'Presidente',
                         candidatos: [
                             { numero: '13', nome: 'João Silva', partido: 'PT' },
-                            { numero: '45', nome: 'Maria Santos', partido: 'PSDB' }
+                            { numero: '45', nome: 'Maria Santos', partido: 'PSDB' },
+                            { numero: '22', nome: 'Pedro Costa', partido: 'PL' },
+                            { numero: '30', nome: 'Ana Beatriz', partido: 'NOVO' },
+                            { numero: '12', nome: 'Roberto Lima', partido: 'PDT' },
+                            { numero: '50', nome: 'Fernanda Souza', partido: 'PSOL' },
+                            { numero: '77', nome: 'Marcos Pereira', partido: 'SOLIDARIEDADE' },
+                            { numero: '44', nome: 'Juliana Alves', partido: 'REPUBLICANOS' }
                         ]
                     },
                     {
                         id: 'cat2',
                         nome: 'Governador',
                         candidatos: [
-                            { numero: '15', nome: 'Carlos Oliveira', partido: 'MDB' },
-                            { numero: '40', nome: 'Ana Costa', partido: 'PSB' }
+                            { numero: '22', nome: 'Carlos Oliveira', partido: 'MDB' },
+                            { numero: '40', nome: 'Ana Costa', partido: 'PSB' },
+                            { numero: '25', nome: 'Miguel Santos', partido: 'DEM' },
+                            { numero: '33', nome: 'Patricia Lima', partido: 'PMN' },
+                            { numero: '18', nome: 'Ricardo Silva', partido: 'REDE' },
+                            { numero: '55', nome: 'Camila Ferreira', partido: 'PSD' },
+                            { numero: '80', nome: 'Antonio Rocha', partido: 'UNIÃO' },
+                            { numero: '36', nome: 'Lucia Mendes', partido: 'PTC' }
+                        ]
+                    },
+                    {
+                        id: 'cat3',
+                        nome: 'Senador',
+                        candidatos: [
+                            { numero: '22', nome: 'Eduardo Martins', partido: 'PT' },
+                            { numero: '20', nome: 'Silvia Campos', partido: 'PSDB' },
+                            { numero: '14', nome: 'Paulo Henrique', partido: 'PTB' },
+                            { numero: '27', nome: 'Beatriz Nunes', partido: 'DC' },
+                            { numero: '35', nome: 'Felipe Torres', partido: 'PMB' },
+                            { numero: '65', nome: 'Renata Dias', partido: 'PCdoB' },
+                            { numero: '90', nome: 'Gabriel Santos', partido: 'PROS' },
+                            { numero: '23', nome: 'Mariana Costa', partido: 'CIDADANIA' }
                         ]
                     }
                 ]
@@ -52,7 +78,38 @@ export class MockApiService {
                 dataInicio: new Date('2026-03-01'),
                 dataFim: new Date('2026-03-15'),
                 status: 'futura',
-                categorias: []
+                categorias: [
+                    {
+                        id: 'cat4',
+                        nome: 'Prefeito',
+                        candidatos: [
+                            { numero: '11', nome: 'José da Silva', partido: 'PT' },
+                            { numero: '25', nome: 'Maria Oliveira', partido: 'PSDB' },
+                            { numero: '33', nome: 'Carlos Mendes', partido: 'MDB' },
+                            { numero: '44', nome: 'Ana Paula', partido: 'PSB' },
+                            { numero: '55', nome: 'Roberto Santos', partido: 'PL' },
+                            { numero: '66', nome: 'Fernanda Costa', partido: 'NOVO' },
+                            { numero: '77', nome: 'Paulo Lima', partido: 'PDT' },
+                            { numero: '88', nome: 'Juliana Alves', partido: 'PSOL' }
+                        ]
+                    },
+                    {
+                        id: 'cat5',
+                        nome: 'Vereador',
+                        candidatos: [
+                            { numero: '10', nome: 'Antonio Silva', partido: 'PT' },
+                            { numero: '20', nome: 'Beatriz Costa', partido: 'PSDB' },
+                            { numero: '30', nome: 'Miguel Santos', partido: 'MDB' },
+                            { numero: '40', nome: 'Patricia Lima', partido: 'PSB' },
+                            { numero: '50', nome: 'Ricardo Oliveira', partido: 'PL' },
+                            { numero: '60', nome: 'Camila Ferreira', partido: 'NOVO' },
+                            { numero: '70', nome: 'Gabriel Rocha', partido: 'PDT' },
+                            { numero: '80', nome: 'Lucia Mendes', partido: 'PSOL' },
+                            { numero: '90', nome: 'Eduardo Torres', partido: 'DEM' },
+                            { numero: '12', nome: 'Silvia Dias', partido: 'PMN' }
+                        ]
+                    }
+                ]
             }
         ];
     }
