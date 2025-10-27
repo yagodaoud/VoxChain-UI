@@ -93,7 +93,7 @@ export const VotacaoPage: React.FC = () => {
     }
 
     return (
-        <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/dashboard" backLabel="Voltar ao Dashboard">
+        <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/eleicoes" backLabel="Voltar às Eleições">
             <div className="max-w-4xl mx-auto px-4 py-4">
                 {/* Botão de voltar sutil */}
                 <div className="mb-4">
