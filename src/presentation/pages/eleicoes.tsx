@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Calendar } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
-import { Layout, GovButton, Loading, StatusBadge, Card } from '../components';
+import { Layout, GovButton, Loading, StatusBadge, Card, SubHeader } from '../components';
 import { ElectionTimer } from '../components/voting';
 import { formatarDataHoraLegivel } from '../../utils/dateUtils';
 
@@ -23,8 +23,9 @@ export const EleicoesPage: React.FC = () => {
 
     return (
         <Layout className="bg-[#F8F9FA]">
+            <SubHeader />
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-4">
                 <h1 className="text-3xl font-bold text-gray-800 mb-8">Eleições Disponíveis</h1>
 
                 {loading ? (

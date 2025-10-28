@@ -3,7 +3,7 @@ import { Eye, EyeOff, CheckCircle, FileText, Calendar, Users } from 'lucide-reac
 import { MockApiService } from '../../data/api/MockApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import type { Voto } from '../../domain/voto';
-import { Layout, Loading, EmptyState, Card } from '../components';
+import { Layout, Loading, EmptyState, Card, SubHeader } from '../components';
 import { formatarDataBrasileira } from '../../utils/dateUtils';
 
 interface VotosPorEleicao {
@@ -62,7 +62,8 @@ export const MeusVotosPage: React.FC = () => {
             backLabel="Voltar às eleições"
             className="bg-[#F8F9FA]"
         >
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <SubHeader />
+            <div className="max-w-7xl mx-auto px-4 py-4">
                 <h1 className="text-3xl font-bold text-gray-800 mb-8">Histórico de Votação</h1>
 
                 {loading ? (
