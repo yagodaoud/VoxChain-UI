@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
 import type { Candidato } from '../../domain/candidato';
-import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal } from '../components';
+import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal } from '../components';
 
 export const VotacaoPage: React.FC = () => {
     const { eleicaoId } = useParams<{ eleicaoId: string }>();
@@ -12,9 +12,12 @@ export const VotacaoPage: React.FC = () => {
     const [categoriaAtual, setCategoriaAtual] = useState(0);
     const [numeroDigitado, setNumeroDigitado] = useState('');
     const [candidatoSelecionado, setCandidatoSelecionado] = useState<Candidato | null>(null);
-    const [votando, setVotando] = useState(false);
+    const [votandoEmBranco, setVotandoEmBranco] = useState(false);
+    const [votosTemporarios, setVotosTemporarios] = useState<Array<{ categoriaId: string, numeroVoto: string }>>([]);
     const [loading, setLoading] = useState(true);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [votando, setVotando] = useState(false);
     const api = new MockApiService();
 
     useEffect(() => {
@@ -31,6 +34,7 @@ export const VotacaoPage: React.FC = () => {
         if (numeroDigitado.length < 2) {
             const novoNumero = numeroDigitado + digito;
             setNumeroDigitado(novoNumero);
+            setVotandoEmBranco(false); // Reset voto em branco quando digita
 
             if (novoNumero.length === 2) {
                 const candidato = categoria?.candidatos.find(c => c.numero === novoNumero);
@@ -42,31 +46,71 @@ export const VotacaoPage: React.FC = () => {
     const handleCorrige = () => {
         setNumeroDigitado('');
         setCandidatoSelecionado(null);
+        setVotandoEmBranco(false);
+    };
+
+
+    const handleBranco = () => {
+        setNumeroDigitado('');
+        setCandidatoSelecionado(null);
+        setVotandoEmBranco(true);
     };
 
     const handleConfirma = async () => {
-        if (!candidatoSelecionado || !categoria) return;
+        if (!categoria) return;
 
-        setVotando(true);
+        // Valida se um voto foi selecionado (candidato ou branco)
+        if (!votandoEmBranco && !candidatoSelecionado) {
+            alert('Por favor, selecione um candidato ou clique em BRANCO antes de confirmar.');
+            return;
+        }
+
         try {
             if (!eleicaoId) return;
-            await api.registrarVoto(eleicaoId, categoria.id, numeroDigitado);
 
-            if (categoriaAtual < (eleicao?.categorias.length || 0) - 1) {
+            // Determina o número do voto (candidato ou branco)
+            const numeroVoto = votandoEmBranco ? 'BRANCO' : (candidatoSelecionado ? numeroDigitado : 'BRANCO');
+
+            // Adiciona o voto ao array temporário
+            const novoVoto = { categoriaId: categoria.id, numeroVoto };
+            const novosVotos = [...votosTemporarios, novoVoto];
+            setVotosTemporarios(novosVotos);
+
+            // Verifica se é a última categoria
+            const totalCategorias = eleicao?.categorias.length || 0;
+            const isUltimaCategoria = categoriaAtual >= totalCategorias - 1;
+
+            if (isUltimaCategoria) {
+                // Última categoria - registra todos os votos em batch
+                setVotando(true);
+                await api.registrarVotosBatch(eleicaoId, novosVotos);
+                setVotando(false);
+                setShowSuccessModal(true);
+            } else {
+                // Não é a última categoria - apenas avança
                 setCategoriaAtual(categoriaAtual + 1);
                 handleCorrige();
-            } else {
-                setShowSuccessModal(true);
             }
         } catch (error) {
-            alert('Erro ao registrar voto');
-        } finally {
             setVotando(false);
+            alert('Erro ao registrar voto');
         }
     };
 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
+        // Limpa todos os votos temporários após sucesso
+        setVotosTemporarios([]);
+        navigate('/eleicoes');
+    };
+
+    const handleBackClick = () => {
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmBack = () => {
+        // Limpa todos os votos temporários
+        setVotosTemporarios([]);
         navigate('/eleicoes');
     };
 
@@ -98,10 +142,10 @@ export const VotacaoPage: React.FC = () => {
                 {/* Botão de voltar sutil */}
                 <div className="mb-4">
                     <button
-                        onClick={() => navigate('/eleicoes')}
+                        onClick={handleBackClick}
                         className="text-[#1351B4] hover:underline text-sm font-medium"
                     >
-                        ← Voltar
+                        ← Voltar às eleições
                     </button>
                 </div>
 
@@ -113,10 +157,14 @@ export const VotacaoPage: React.FC = () => {
                     categoria={categoria}
                     numeroDigitado={numeroDigitado}
                     candidatoSelecionado={candidatoSelecionado}
+                    votandoEmBranco={votandoEmBranco}
                     onDigito={handleDigito}
                     onCorrige={handleCorrige}
                     onConfirma={handleConfirma}
+                    onBranco={handleBranco}
                     votando={votando}
+                    isUltimaCategoria={eleicao?.categorias ? categoriaAtual >= eleicao.categorias.length - 1 : false}
+                    canConfirm={votandoEmBranco || !!candidatoSelecionado}
                 />
             </div>
 
@@ -126,6 +174,18 @@ export const VotacaoPage: React.FC = () => {
                 onClose={handleSuccessModalClose}
                 eleicaoNome={eleicao?.nome}
                 onConfirm={handleSuccessModalClose}
+            />
+
+            {/* Modal de Confirmação para Voltar */}
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={handleConfirmBack}
+                title="Atenção!"
+                message="Ao voltar às eleições, seu voto atual será perdido. Tem certeza que deseja continuar?"
+                confirmText="Sim, voltar"
+                cancelText="Cancelar"
+                confirmButtonColor="bg-red-500 hover:bg-red-600"
             />
         </Layout>
     );

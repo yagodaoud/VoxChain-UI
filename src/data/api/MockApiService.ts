@@ -3,10 +3,12 @@ import type { Eleicao } from '../../domain/eleicao';
 import type { Voto } from '../../domain/voto';
 
 export class MockApiService {
-    private readonly baseUrl = 'http://localhost:8080'; // Trocar quando integrar API real
+    // URL base para futura integração com API real
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private readonly baseUrl = 'http://localhost:8080';
 
     // Simula autenticação Basic
-    async autenticar(cpf: string, senha: string): Promise<Usuario> {
+    async autenticar(cpf: string, _senha: string): Promise<Usuario> {
         // Mock: aceita qualquer CPF/senha por enquanto
         await this.delay(800);
         return {
@@ -114,7 +116,7 @@ export class MockApiService {
         ];
     }
 
-    async buscarMeusVotos(cpf: string): Promise<Voto[]> {
+    async buscarMeusVotos(_cpf: string): Promise<Voto[]> {
         await this.delay(600);
         return [
             {
@@ -150,9 +152,16 @@ export class MockApiService {
         ];
     }
 
-    async registrarVoto(eleicaoId: string, categoriaId: string, numeroVoto: string): Promise<string> {
+    async registrarVoto(_eleicaoId: string, _categoriaId: string, _numeroVoto: string): Promise<string> {
         await this.delay(1200);
         // Retorna hash simulado
+        return '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    }
+
+    async registrarVotosBatch(eleicaoId: string, votos: Array<{ categoriaId: string, numeroVoto: string }>): Promise<string> {
+        await this.delay(1500); // Simula processamento batch
+        console.log('Registrando votos em batch:', { eleicaoId, votos });
+        // Retorna hash simulado para o batch completo
         return '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
     }
 
