@@ -30,31 +30,37 @@ export class MockApiService {
     // URL base para integração com API blockchain (via proxy do Vite)
     private readonly baseUrl = '/api/v1';
 
-    // Simula autenticação Basic
-    async autenticar(cpf: string, _senha: string): Promise<Usuario> {
-        // Mock: aceita qualquer CPF/senha por enquanto
-        await this.delay(800);
-
-        // Determina role baseado no CPF (mock)
-        let tipo: 'eleitor' | 'admin' | 'super-admin';
-        let nome = 'Eleitor Demo';
-
-        if (cpf === '111.111.111-11') {
-            tipo = 'super-admin';
-            nome = 'Super Admin';
-        } else if (cpf === '000.000.000-00') {
-            tipo = 'admin';
-            nome = 'Administrador';
-        } else {
-            tipo = 'eleitor';
-            nome = 'Eleitor Demo';
+    // Headers de autenticação Bearer a partir do token salvo
+    private getAuthHeaders(): Record<string, string> {
+        try {
+            const storedUsuario = localStorage.getItem('usuario');
+            if (!storedUsuario) return {};
+            const usuario: Usuario = JSON.parse(storedUsuario);
+            if (!usuario?.token) return {};
+            return { Authorization: `Bearer ${usuario.token}` };
+        } catch {
+            return {};
         }
+    }
 
-        return {
-            cpf,
-            nome,
-            tipo,
-        };
+    async autenticar(cpf: string, senha: string): Promise<Usuario> {
+        cpf = cpf.replace(/\D/g, '');
+
+        try {
+            const response = await axios.post(`${this.baseUrl}/auth/login`, {
+                cpf,
+                senha
+            });
+
+            return {
+                cpf,
+                nome: response.data.nome,
+                tipo: response.data.tipo,
+                token: response.data.token
+            };
+        } catch (error) {
+            throw new Error('Credenciais inválidas');
+        }
     }
 
     /**
@@ -181,7 +187,8 @@ export class MockApiService {
         try {
             const response = await axios.post<EleicaoApiResponse>(
                 `${this.baseUrl}/eleicoes/criar`,
-                payload
+                payload,
+                { headers: this.getAuthHeaders() }
             );
 
             // Mapeia a resposta criada de volta para o domínio
@@ -214,7 +221,18 @@ export class MockApiService {
     }
 
     async criarCandidato(_categoriaId: string, candidato: Candidato): Promise<Candidato> {
-        return candidato;
+        try {
+            const response = await axios.post<Candidato>(
+                `${this.baseUrl}/candidatos/criar`,
+                candidato,
+                { headers: this.getAuthHeaders() }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao criar candidato:', error);
+            // Mantém comportamento de não quebrar UI retornando o candidato enviado
+            return candidato;
+        }
     }
 
     async deletarCandidato(id: string): Promise<void> {

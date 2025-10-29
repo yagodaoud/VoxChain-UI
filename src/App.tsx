@@ -21,6 +21,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // Componente para rotas de admin
 const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, usuario } = useAuth();
+    console.log(usuario);
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
