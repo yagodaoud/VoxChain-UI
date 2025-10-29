@@ -29,7 +29,7 @@ export class MockApiService {
         }
 
         return {
-            cpf: cpf,
+            cpf,
             nome,
             tipo,
         };

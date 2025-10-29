@@ -63,7 +63,7 @@ export const LoginPage: React.FC = () => {
             {/* Login Form */}
             <div className="max-w-md mx-auto px-4 py-16">
                 <FormCard
-                    title="Entrar no VoxChain"
+                    title="Entrar na VoxChain"
                     subtitle="Use seu CPF e senha para acessar"
                     icon={User}
                 >
@@ -85,7 +85,7 @@ export const LoginPage: React.FC = () => {
                             required
                         />
 
-                        <GovButton fullWidth disabled={loading}>
+                        <GovButton type="submit" fullWidth disabled={loading}>
                             {loading ? 'Autenticando...' : 'Entrar'}
                         </GovButton>
                     </form>
