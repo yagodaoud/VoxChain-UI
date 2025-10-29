@@ -2,12 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Users, Vote, Shield } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Layout, Card, GovButton } from '../../components';
+import { Layout, Card, GovButton, StatCard } from '../../components';
 import { AdminSubHeader } from '../../components/layout';
+import { useAdminStats } from '../../../hooks/useAdminStats';
 
 export const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { usuario } = useAuth();
+    const { activeElectionsCount, totalCandidatesCount, totalVotesCount, isLoading } = useAdminStats(usuario?.cpf);
 
     const menuItems = [
         {
@@ -60,41 +62,9 @@ export const AdminDashboardPage: React.FC = () => {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card padding="lg">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#1351B4] rounded-lg flex items-center justify-center">
-                                <Vote className="text-white" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-gray-800">0</div>
-                                <div className="text-sm text-gray-600">Eleições Ativas</div>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card padding="lg">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#071D41] rounded-lg flex items-center justify-center">
-                                <Users className="text-white" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-gray-800">0</div>
-                                <div className="text-sm text-gray-600">Candidatos Cadastrados</div>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card padding="lg">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                                <Shield className="text-white" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-gray-800">0</div>
-                                <div className="text-sm text-gray-600">Total de Votos</div>
-                            </div>
-                        </div>
-                    </Card>
+                    <StatCard icon={Vote} iconBgClassName="bg-[#1351B4]" value={isLoading ? '-' : activeElectionsCount} label="Eleições Ativas" />
+                    <StatCard icon={Users} iconBgClassName="bg-[#071D41]" value={isLoading ? '-' : totalCandidatesCount} label="Candidatos Cadastrados" />
+                    <StatCard icon={Shield} iconBgClassName="bg-green-600" value={isLoading ? '-' : totalVotesCount} label="Total de Votos" />
                 </div>
 
                 {/* Menu Items */}
