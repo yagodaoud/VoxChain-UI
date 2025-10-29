@@ -15,7 +15,7 @@ export const CriarCandidatoPage: React.FC = () => {
     const [numero, setNumero] = useState('');
     const [nome, setNome] = useState('');
     const [partido, setPartido] = useState('');
-    const [foto, setFoto] = useState('');
+    const [fotoUrl, setFotoUrl] = useState('');
     const [eleicaoSelecionada, setEleicaoSelecionada] = useState('');
     const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
     const [saving, setSaving] = useState(false);
@@ -56,10 +56,13 @@ export const CriarCandidatoPage: React.FC = () => {
 
         try {
             const novoCandidato: Candidato = {
+                id: '',
+                cargo: '',
+                uf: '',
                 numero,
                 nome,
                 partido,
-                foto: foto || undefined
+                fotoUrl
             };
 
             await api.criarCandidato(categoriaSelecionada, novoCandidato);
@@ -179,8 +182,8 @@ export const CriarCandidatoPage: React.FC = () => {
 
                             <Input
                                 label="URL da Foto (opcional)"
-                                value={foto}
-                                onChange={setFoto}
+                                value={fotoUrl}
+                                onChange={setFotoUrl}
                                 placeholder="https://exemplo.com/foto.jpg"
                                 type="url"
                             />

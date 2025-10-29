@@ -94,7 +94,7 @@ export class MockApiService {
         try {
             // Chama a API blockchain real
             const response = await axios.get<EleicaoApiResponse[]>(
-                `${this.baseUrl}/eleicao/listar`,
+                `${this.baseUrl}/eleicoes/listar`,
                 {
                     params: { finished: true }
                 }
@@ -111,7 +111,6 @@ export class MockApiService {
     }
 
     async buscarMeusVotos(_cpf: string): Promise<Voto[]> {
-        await this.delay(600);
         return [
             {
                 eleicaoId: '0',
@@ -178,20 +177,12 @@ export class MockApiService {
         console.log('Deletando eleição:', id);
     }
 
-    async buscarCandidatos(): Promise<Array<{ categoriaId: string; candidato: Candidato }>> {
-        await this.delay(500);
-        const eleicoes = await this.buscarEleicoes();
-        const candidatos: Array<{ categoriaId: string; candidato: Candidato }> = [];
+    async buscarCandidatos(): Promise<Array<Candidato>> {
+        const response = await axios.get<Candidato[]>(
+            `${this.baseUrl}/candidatos/listar`
+        );
 
-        eleicoes.forEach(eleicao => {
-            eleicao.categorias.forEach(categoria => {
-                categoria.candidatos.forEach(candidato => {
-                    candidatos.push({ categoriaId: categoria.id, candidato });
-                });
-            });
-        });
-
-        return candidatos;
+        return response.data;
     }
 
     async criarCandidato(_categoriaId: string, candidato: Candidato): Promise<Candidato> {
@@ -199,9 +190,13 @@ export class MockApiService {
         return candidato;
     }
 
-    async deletarCandidato(categoriaId: string, numeroCandidato: string): Promise<void> {
-        await this.delay(600);
-        console.log('Deletando candidato:', { categoriaId, numeroCandidato });
+    async deletarCandidato(id: string): Promise<void> {
+        try {
+            await axios.delete(`${this.baseUrl}/candidatos/deletar/${id}`);
+        } catch (error) {
+            console.error('Erro ao deletar candidato:', error);
+            throw error;
+        }
     }
 
     private delay(ms: number): Promise<void> {

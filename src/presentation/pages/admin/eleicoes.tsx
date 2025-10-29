@@ -146,10 +146,6 @@ export const AdminEleicoesPage: React.FC = () => {
                                     <p className="text-gray-500 mb-6">
                                         Comece criando uma nova eleição
                                     </p>
-                                    <GovButton onClick={() => navigate('/admin/eleicoes/criar')}>
-                                        <Plus size={18} />
-                                        Criar Primeira Eleição
-                                    </GovButton>
                                 </div>
                             </Card>
                         )}
