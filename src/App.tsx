@@ -6,11 +6,31 @@ import { LoginPage } from '../src/presentation/pages/login'
 import { VotacaoPage } from '../src/presentation/pages/votacao'
 import { EleicoesPage } from '../src/presentation/pages/eleicoes'
 import { MeusVotosPage } from '../src/presentation/pages/meus-votos'
+import { AdminDashboardPage } from '../src/presentation/pages/admin/dashboard'
+import { AdminEleicoesPage } from '../src/presentation/pages/admin/eleicoes'
+import { CriarEleicaoPage } from '../src/presentation/pages/admin/eleicoes/criar'
+import { AdminCandidatosPage } from '../src/presentation/pages/admin/candidatos'
+import { CriarCandidatoPage } from '../src/presentation/pages/admin/candidatos/criar'
 
 // Componente para rotas protegidas
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// Componente para rotas de admin
+const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated, usuario } = useAuth();
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (usuario?.tipo !== 'admin' && usuario?.tipo !== 'super-admin') {
+        return <Navigate to="/eleicoes" replace />;
+    }
+
+    return <>{children}</>;
 };
 
 function AppRoutes() {
@@ -41,6 +61,55 @@ function AppRoutes() {
                         <ProtectedRoute>
                             <MeusVotosPage />
                         </ProtectedRoute>
+                    }
+                />
+                {/* Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminDashboardPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleicoes"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminEleicoesPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleicoes/criar"
+                    element={
+                        <AdminProtectedRoute>
+                            <CriarEleicaoPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleicoes/editar/:id"
+                    element={
+                        <AdminProtectedRoute>
+                            <CriarEleicaoPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/candidatos"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminCandidatosPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/candidatos/criar"
+                    element={
+                        <AdminProtectedRoute>
+                            <CriarCandidatoPage />
+                        </AdminProtectedRoute>
                     }
                 />
             </Routes>

@@ -5,4 +5,6 @@ export { Card } from './Card';
 export { EmptyState } from './EmptyState';
 export { SuccessModal } from './SuccessModal';
 export { VotingSuccessModal } from './VotingSuccessModal';
+export { ElectionSuccessModal } from './ElectionSuccessModal';
+export { CandidateSuccessModal } from './CandidateSuccessModal';
 export { ConfirmModal } from './ConfirmModal';

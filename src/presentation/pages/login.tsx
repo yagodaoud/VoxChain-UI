@@ -14,7 +14,12 @@ export const LoginPage: React.FC = () => {
     // Redireciona se já estiver logado
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/eleicoes');
+            const user = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (user.tipo === 'admin' || user.tipo === 'super-admin') {
+                navigate('/admin');
+            } else {
+                navigate('/eleicoes');
+            }
         }
     }, [isAuthenticated, navigate]);
 
@@ -23,7 +28,13 @@ export const LoginPage: React.FC = () => {
         setLoading(true);
         try {
             await login(cpf, senha);
-            navigate('/eleicoes');
+            const user = JSON.parse(localStorage.getItem('usuario') || '{}');
+
+            if (user.tipo === 'admin' || user.tipo === 'super-admin') {
+                navigate('/admin');
+            } else {
+                navigate('/eleicoes');
+            }
         } catch (error) {
             alert('Erro ao fazer login');
         } finally {

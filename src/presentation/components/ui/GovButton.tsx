@@ -7,6 +7,7 @@ interface GovButtonProps {
     fullWidth?: boolean;
     disabled?: boolean;
     className?: string;
+    type?: 'button' | 'submit' | 'reset';
 }
 
 export const GovButton: React.FC<GovButtonProps> = ({
@@ -15,7 +16,8 @@ export const GovButton: React.FC<GovButtonProps> = ({
     variant = 'primary',
     fullWidth = false,
     disabled = false,
-    className = ''
+    className = '',
+    type = 'button'
 }) => {
     const baseClasses = "px-6 py-3 rounded font-medium transition-all duration-200 flex items-center justify-center gap-2";
     const variantClasses = variant === 'primary'
@@ -26,6 +28,7 @@ export const GovButton: React.FC<GovButtonProps> = ({
 
     return (
         <button
+            type={type}
             onClick={onClick}
             disabled={disabled}
             className={`${baseClasses} ${variantClasses} ${widthClass} ${disabledClasses} ${className}`}

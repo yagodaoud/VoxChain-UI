@@ -1,6 +1,7 @@
 import type { Usuario } from '../../domain/usuario';
 import type { Eleicao } from '../../domain/eleicao';
 import type { Voto } from '../../domain/voto';
+import type { Candidato } from '../../domain/candidato';
 
 export class MockApiService {
     // URL base para futura integração com API real
@@ -11,10 +12,26 @@ export class MockApiService {
     async autenticar(cpf: string, _senha: string): Promise<Usuario> {
         // Mock: aceita qualquer CPF/senha por enquanto
         await this.delay(800);
+
+        // Determina role baseado no CPF (mock)
+        let tipo: 'eleitor' | 'admin' | 'super-admin';
+        let nome = 'Eleitor Demo';
+
+        if (cpf === '111.111.111-11') {
+            tipo = 'super-admin';
+            nome = 'Super Admin';
+        } else if (cpf === '000.000.000-00') {
+            tipo = 'admin';
+            nome = 'Administrador';
+        } else {
+            tipo = 'eleitor';
+            nome = 'Eleitor Demo';
+        }
+
         return {
             cpf: cpf,
-            nome: 'Eleitor Demo',
-            tipo: 'eleitor'
+            nome,
+            tipo,
         };
     }
 
@@ -163,6 +180,51 @@ export class MockApiService {
         console.log('Registrando votos em batch:', { eleicaoId, votos });
         // Retorna hash simulado para o batch completo
         return '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    }
+
+    // Admin methods
+    async criarEleicao(eleicao: Eleicao): Promise<Eleicao> {
+        await this.delay(800);
+        return eleicao;
+    }
+
+    async atualizarEleicao(id: string, eleicao: Partial<Eleicao>): Promise<Eleicao> {
+        await this.delay(800);
+        const eleicoes = await this.buscarEleicoes();
+        const eleicaoAtual = eleicoes.find(e => e.id === id);
+        if (!eleicaoAtual) throw new Error('Eleição não encontrada');
+        return { ...eleicaoAtual, ...eleicao };
+    }
+
+    async deletarEleicao(id: string): Promise<void> {
+        await this.delay(600);
+        console.log('Deletando eleição:', id);
+    }
+
+    async buscarCandidatos(): Promise<Array<{ categoriaId: string; candidato: Candidato }>> {
+        await this.delay(500);
+        const eleicoes = await this.buscarEleicoes();
+        const candidatos: Array<{ categoriaId: string; candidato: Candidato }> = [];
+
+        eleicoes.forEach(eleicao => {
+            eleicao.categorias.forEach(categoria => {
+                categoria.candidatos.forEach(candidato => {
+                    candidatos.push({ categoriaId: categoria.id, candidato });
+                });
+            });
+        });
+
+        return candidatos;
+    }
+
+    async criarCandidato(_categoriaId: string, candidato: Candidato): Promise<Candidato> {
+        await this.delay(800);
+        return candidato;
+    }
+
+    async deletarCandidato(categoriaId: string, numeroCandidato: string): Promise<void> {
+        await this.delay(600);
+        console.log('Deletando candidato:', { categoriaId, numeroCandidato });
     }
 
     private delay(ms: number): Promise<void> {
