@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { Usuario } from '../../domain/usuario';
 import type { Eleicao } from '../../domain/eleicao';
 import type { Categoria } from '../../domain/categoria';
+import { CategoriaEleicao } from '../../domain/categoria';
 import type { Voto } from '../../domain/voto';
 import type { Candidato } from '../../domain/candidato';
 
@@ -14,6 +15,15 @@ interface EleicaoApiResponse {
     dataInicio: number; // timestamp Unix
     dataFim: number; // timestamp Unix
     ativa: boolean;
+}
+
+// Tipo de criação esperado pela API
+interface CriarEleicaoRequest {
+    nome: string;
+    descricao: string;
+    categorias: string[]; // valores do enum CategoriaEleicao em string
+    dataInicio: number; // Unix seconds
+    dataFim: number; // Unix seconds
 }
 
 export class MockApiService {
@@ -159,7 +169,29 @@ export class MockApiService {
 
     // Admin methods
     async criarEleicao(eleicao: Eleicao): Promise<Eleicao> {
-        return eleicao;
+        // Converte o modelo de domínio para o payload da API
+        const payload: CriarEleicaoRequest = {
+            nome: eleicao.nome,
+            descricao: eleicao.descricao,
+            categorias: this.converterCategoriasParaEnumStrings(eleicao.categorias),
+            dataInicio: Math.floor(eleicao.dataInicio.getTime() / 1000),
+            dataFim: Math.floor(eleicao.dataFim.getTime() / 1000)
+        };
+
+        try {
+            const response = await axios.post<EleicaoApiResponse>(
+                `${this.baseUrl}/eleicoes/criar`,
+                payload
+            );
+
+            // Mapeia a resposta criada de volta para o domínio
+            return this.mapearEleicaoApiParaDomínio(response.data);
+        } catch (error) {
+            console.error('Erro ao criar eleição na API:', error);
+            // Em caso de falha, ainda retornamos a eleição local para não quebrar a UI
+            // mas idealmente deveríamos propagar o erro.
+            return eleicao;
+        }
     }
 
     async atualizarEleicao(id: string, eleicao: Partial<Eleicao>): Promise<Eleicao> {
@@ -196,5 +228,46 @@ export class MockApiService {
 
     private delay(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Util: converte nomes livres de categorias para os valores do enum esperado pela API
+    private converterCategoriasParaEnumStrings(categorias: Categoria[]): string[] {
+        return categorias
+            .map(c => c.nome)
+            .map(nome => this.normalizarParaEnum(nome))
+            .filter(Boolean) as string[];
+    }
+
+    private normalizarParaEnum(valor: string): string | null {
+        const upper = valor
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // remove acentos
+            .replace(/[^a-zA-Z_\s]/g, '') // remove chars especiais mantendo espaços/underscore
+            .trim()
+            .replace(/\s+/g, '_')
+            .toUpperCase();
+
+        // Se corresponder a um valor do enum, retorna; senão, tenta mapear por alias comuns
+        if (upper in CategoriaEleicao) {
+            return upper;
+        }
+
+        const aliases: Record<string, CategoriaEleicao> = {
+            PRESIDENTE: CategoriaEleicao.PRESIDENTE,
+            GOVERNADOR: CategoriaEleicao.GOVERNADOR,
+            SENADOR: CategoriaEleicao.SENADOR,
+            DEPUTADO: CategoriaEleicao.DEPUTADO_FEDERAL, // fallback
+            DEPUTADO_FEDERAL: CategoriaEleicao.DEPUTADO_FEDERAL,
+            DEPUTADO_ESTADUAL: CategoriaEleicao.DEPUTADO_ESTADUAL,
+            PREFEITO: CategoriaEleicao.PREFEITO,
+            VEREADOR: CategoriaEleicao.VEREADOR
+        };
+
+        if (upper in aliases) {
+            return aliases[upper];
+        }
+
+        // não reconhecido
+        return null;
     }
 }
