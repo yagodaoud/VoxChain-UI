@@ -3,7 +3,7 @@ import { Eye, EyeOff, CheckCircle, FileText, Calendar, Users } from 'lucide-reac
 import { MockApiService } from '../../data/api/MockApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import type { Voto } from '../../domain/voto';
-import { Layout, Loading, EmptyState, Card, SubHeader } from '../components';
+import { Layout, Loading, EmptyState, Card, SubHeader, SectionHeader } from '../components';
 import { formatarDataBrasileira } from '../../utils/dateUtils';
 
 interface VotosPorEleicao {
@@ -64,13 +64,11 @@ export const MeusVotosPage: React.FC = () => {
         >
             <SubHeader />
             <div className="max-w-7xl mx-auto px-4 py-4">
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <FileText className="text-[#1351B4]" size={28} />
-                        <h1 className="text-3xl font-bold text-gray-800">Histórico de Votação</h1>
-                    </div>
-                    <p className="text-gray-600">Consulte os votos registrados por eleição</p>
-                </div>
+                <SectionHeader
+                    icon={FileText}
+                    title="Histórico de Votação"
+                    subtitle="Consulte os votos registrados por eleição"
+                />
 
                 {loading ? (
                     <Loading text="Carregando seus votos..." />
@@ -79,6 +77,7 @@ export const MeusVotosPage: React.FC = () => {
                         icon={FileText}
                         title="Nenhum voto registrado"
                         description="Você ainda não tem votos registrados"
+                        className="bg-gray-50 py-24"
                     />
                 ) : (
                     <div className="space-y-6">

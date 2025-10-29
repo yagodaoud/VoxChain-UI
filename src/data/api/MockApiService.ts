@@ -1,12 +1,24 @@
+import axios from 'axios';
 import type { Usuario } from '../../domain/usuario';
 import type { Eleicao } from '../../domain/eleicao';
+import type { Categoria } from '../../domain/categoria';
 import type { Voto } from '../../domain/voto';
 import type { Candidato } from '../../domain/candidato';
 
+// Tipo para resposta da API blockchain
+interface EleicaoApiResponse {
+    id: string;
+    nome: string;
+    descricao: string;
+    categorias: string[];
+    dataInicio: number; // timestamp Unix
+    dataFim: number; // timestamp Unix
+    ativa: boolean;
+}
+
 export class MockApiService {
-    // URL base para futura integração com API real
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    private readonly baseUrl = 'http://localhost:8080';
+    // URL base para integração com API blockchain (via proxy do Vite)
+    private readonly baseUrl = '/api/v1';
 
     // Simula autenticação Basic
     async autenticar(cpf: string, _senha: string): Promise<Usuario> {
@@ -35,102 +47,67 @@ export class MockApiService {
         };
     }
 
+    /**
+     * Converte resposta da API blockchain para o formato do domínio
+     */
+    private mapearEleicaoApiParaDomínio(eleicaoApi: EleicaoApiResponse): Eleicao {
+        const agora = new Date();
+        const dataInicio = new Date(eleicaoApi.dataInicio * 1000); // Converte timestamp Unix para Date
+        const dataFim = new Date(eleicaoApi.dataFim * 1000);
+
+        // Determina o status baseado na data atual e no campo ativa
+        let status: 'futura' | 'ativa' | 'encerrada';
+        if (agora > dataFim) {
+            // Eleição já passou da data de término
+            status = 'encerrada';
+        } else if (eleicaoApi.ativa && agora >= dataInicio && agora <= dataFim) {
+            // Eleição ativa e dentro do período
+            status = 'ativa';
+        } else if (agora < dataInicio) {
+            // Eleição ainda não começou
+            status = 'futura';
+        } else {
+            // Caso padrão: se não está ativa mas está no período, considera encerrada
+            status = eleicaoApi.ativa ? 'ativa' : 'encerrada';
+        }
+
+        // Converte array de strings de categorias para objetos Categoria
+        // Por enquanto, as categorias não terão candidatos (serão carregados depois quando necessário)
+        const categorias: Categoria[] = eleicaoApi.categorias.map((nomeCategoria, index) => ({
+            id: `${eleicaoApi.id}-cat-${index}`,
+            nome: nomeCategoria,
+            candidatos: [] // Candidatos serão carregados quando necessário
+        }));
+
+        return {
+            id: eleicaoApi.id,
+            nome: eleicaoApi.nome,
+            descricao: eleicaoApi.descricao,
+            dataInicio,
+            dataFim,
+            status,
+            categorias
+        };
+    }
+
     async buscarEleicoes(): Promise<Eleicao[]> {
-        await this.delay(500);
-        return [
-            {
-                id: '1',
-                nome: 'Eleições Gerais 2025',
-                descricao: 'Eleição para Presidente, Governador e Senador',
-                dataInicio: new Date('2025-10-01'),
-                dataFim: new Date('2025-10-31'),
-                status: 'ativa',
-                categorias: [
-                    {
-                        id: 'cat1',
-                        nome: 'Presidente',
-                        candidatos: [
-                            { numero: '13', nome: 'João Silva', partido: 'PT' },
-                            { numero: '45', nome: 'Maria Santos', partido: 'PSDB' },
-                            { numero: '22', nome: 'Pedro Costa', partido: 'PL' },
-                            { numero: '30', nome: 'Ana Beatriz', partido: 'NOVO' },
-                            { numero: '12', nome: 'Roberto Lima', partido: 'PDT' },
-                            { numero: '50', nome: 'Fernanda Souza', partido: 'PSOL' },
-                            { numero: '77', nome: 'Marcos Pereira', partido: 'SOLIDARIEDADE' },
-                            { numero: '44', nome: 'Juliana Alves', partido: 'REPUBLICANOS' }
-                        ]
-                    },
-                    {
-                        id: 'cat2',
-                        nome: 'Governador',
-                        candidatos: [
-                            { numero: '22', nome: 'Carlos Oliveira', partido: 'MDB' },
-                            { numero: '40', nome: 'Ana Costa', partido: 'PSB' },
-                            { numero: '25', nome: 'Miguel Santos', partido: 'DEM' },
-                            { numero: '33', nome: 'Patricia Lima', partido: 'PMN' },
-                            { numero: '18', nome: 'Ricardo Silva', partido: 'REDE' },
-                            { numero: '55', nome: 'Camila Ferreira', partido: 'PSD' },
-                            { numero: '80', nome: 'Antonio Rocha', partido: 'UNIÃO' },
-                            { numero: '36', nome: 'Lucia Mendes', partido: 'PTC' }
-                        ]
-                    },
-                    {
-                        id: 'cat3',
-                        nome: 'Senador',
-                        candidatos: [
-                            { numero: '22', nome: 'Eduardo Martins', partido: 'PT' },
-                            { numero: '20', nome: 'Silvia Campos', partido: 'PSDB' },
-                            { numero: '14', nome: 'Paulo Henrique', partido: 'PTB' },
-                            { numero: '27', nome: 'Beatriz Nunes', partido: 'DC' },
-                            { numero: '35', nome: 'Felipe Torres', partido: 'PMB' },
-                            { numero: '65', nome: 'Renata Dias', partido: 'PCdoB' },
-                            { numero: '90', nome: 'Gabriel Santos', partido: 'PROS' },
-                            { numero: '23', nome: 'Mariana Costa', partido: 'CIDADANIA' }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: '2',
-                nome: 'Eleições Municipais 2026',
-                descricao: 'Eleição para Prefeito e Vereadores',
-                dataInicio: new Date('2026-03-01'),
-                dataFim: new Date('2026-03-15'),
-                status: 'futura',
-                categorias: [
-                    {
-                        id: 'cat4',
-                        nome: 'Prefeito',
-                        candidatos: [
-                            { numero: '11', nome: 'José da Silva', partido: 'PT' },
-                            { numero: '25', nome: 'Maria Oliveira', partido: 'PSDB' },
-                            { numero: '33', nome: 'Carlos Mendes', partido: 'MDB' },
-                            { numero: '44', nome: 'Ana Paula', partido: 'PSB' },
-                            { numero: '55', nome: 'Roberto Santos', partido: 'PL' },
-                            { numero: '66', nome: 'Fernanda Costa', partido: 'NOVO' },
-                            { numero: '77', nome: 'Paulo Lima', partido: 'PDT' },
-                            { numero: '88', nome: 'Juliana Alves', partido: 'PSOL' }
-                        ]
-                    },
-                    {
-                        id: 'cat5',
-                        nome: 'Vereador',
-                        candidatos: [
-                            { numero: '10', nome: 'Antonio Silva', partido: 'PT' },
-                            { numero: '20', nome: 'Beatriz Costa', partido: 'PSDB' },
-                            { numero: '30', nome: 'Miguel Santos', partido: 'MDB' },
-                            { numero: '40', nome: 'Patricia Lima', partido: 'PSB' },
-                            { numero: '50', nome: 'Ricardo Oliveira', partido: 'PL' },
-                            { numero: '60', nome: 'Camila Ferreira', partido: 'NOVO' },
-                            { numero: '70', nome: 'Gabriel Rocha', partido: 'PDT' },
-                            { numero: '80', nome: 'Lucia Mendes', partido: 'PSOL' },
-                            { numero: '90', nome: 'Eduardo Torres', partido: 'DEM' },
-                            { numero: '12', nome: 'Silvia Dias', partido: 'PMN' }
-                        ]
-                    }
-                ]
-            }
-        ];
+        try {
+            // Chama a API blockchain real
+            const response = await axios.get<EleicaoApiResponse[]>(
+                `${this.baseUrl}/eleicao/listar`,
+                {
+                    params: { finished: true }
+                }
+            );
+
+            // Mapeia cada eleição da resposta para o formato do domínio
+            return response.data.map(eleicaoApi => this.mapearEleicaoApiParaDomínio(eleicaoApi));
+        } catch (error) {
+            console.error('Erro ao buscar eleições da API:', error);
+            // Em caso de erro, retorna array vazio ou pode lançar o erro
+            // Por enquanto, retorna array vazio para não quebrar a UI
+            return [];
+        }
     }
 
     async buscarMeusVotos(_cpf: string): Promise<Voto[]> {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Calendar, Vote } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
 import { MockApiService } from '../../data/api/MockApiService';
-import { Layout, GovButton, Loading, StatusBadge, Card, SubHeader } from '../components';
+import { Layout, GovButton, Loading, StatusBadge, Card, SubHeader, EmptyState, SectionHeader } from '../components';
 import { ElectionTimer } from '../components/voting';
 import { formatarDataHoraLegivel } from '../../utils/dateUtils';
 
@@ -26,16 +26,21 @@ export const EleicoesPage: React.FC = () => {
             <SubHeader />
             {/* Content */}
             <div className="max-w-7xl mx-auto px-4 py-4">
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Vote className="text-[#1351B4]" size={28} />
-                        <h1 className="text-3xl font-bold text-gray-800">Eleições Disponíveis</h1>
-                    </div>
-                    <p className="text-gray-600">Veja as eleições disponíveis para votar</p>
-                </div>
+                <SectionHeader
+                    icon={Vote}
+                    title="Eleições Disponíveis"
+                    subtitle="Veja as eleições disponíveis para votar"
+                />
 
                 {loading ? (
                     <Loading text="Carregando eleições..." />
+                ) : eleicoes.length === 0 ? (
+                    <EmptyState
+                        icon={Calendar}
+                        title="Nenhuma eleição disponível"
+                        description="Não há eleições ativas ou futuras no momento."
+                        className="bg-gray-50 py-24"
+                    />
                 ) : (
                     <div className="grid gap-6">
                         {eleicoes.map(eleicao => (

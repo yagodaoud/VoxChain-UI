@@ -9,3 +9,4 @@ export { ElectionSuccessModal } from './ElectionSuccessModal';
 export { CandidateSuccessModal } from './CandidateSuccessModal';
 export { ConfirmModal } from './ConfirmModal';
 export { StatCard } from './StatCard';
+export { SectionHeader } from './SectionHeader';
