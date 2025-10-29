@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, User, Hash } from 'lucide-react';
+import { Plus, Trash2, User, Hash, Users } from 'lucide-react';
 import { MockApiService } from '../../../data/api/MockApiService';
 import { Layout, GovButton, Loading, Card, AdminSubHeader, ConfirmModal } from '../../components';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -80,7 +80,10 @@ export const AdminCandidatosPage: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-800 mb-2">Gerenciar Candidatos</h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Users className="text-[#1351B4]" size={32} />
+                            <h1 className="text-4xl font-bold text-gray-800">Gerenciar Candidatos</h1>
+                        </div>
                         <p className="text-gray-600">Visualize e gerencie todos os candidatos cadastrados</p>
                     </div>
                     <GovButton onClick={() => navigate('/admin/candidatos/criar')}>

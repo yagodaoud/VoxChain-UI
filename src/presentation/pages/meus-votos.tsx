@@ -64,7 +64,13 @@ export const MeusVotosPage: React.FC = () => {
         >
             <SubHeader />
             <div className="max-w-7xl mx-auto px-4 py-4">
-                <h1 className="text-3xl font-bold text-gray-800 mb-8">Histórico de Votação</h1>
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <FileText className="text-[#1351B4]" size={28} />
+                        <h1 className="text-3xl font-bold text-gray-800">Histórico de Votação</h1>
+                    </div>
+                    <p className="text-gray-600">Consulte os votos registrados por eleição</p>
+                </div>
 
                 {loading ? (
                     <Loading text="Carregando seus votos..." />

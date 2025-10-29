@@ -11,7 +11,7 @@ export const AdminSubHeader: React.FC<AdminSubHeaderProps> = ({ className = '' }
 
     // Função para verificar se o botão está ativo
     const isActive = (path: string) => {
-        return location.pathname === path || location.pathname.startsWith(path + '/');
+        return location.pathname === path;
     };
 
     // Função para obter as classes CSS do botão

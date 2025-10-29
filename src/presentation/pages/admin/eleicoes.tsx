@@ -55,7 +55,10 @@ export const AdminEleicoesPage: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-800 mb-2">Gerenciar Eleições</h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Vote className="text-[#1351B4]" size={32} />
+                            <h1 className="text-4xl font-bold text-gray-800">Gerenciar Eleições</h1>
+                        </div>
                         <p className="text-gray-600">Crie e gerencie todas as eleições do sistema</p>
                     </div>
                     <GovButton onClick={() => navigate('/admin/eleicoes/criar')}>
