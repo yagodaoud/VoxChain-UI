@@ -146,7 +146,6 @@ export class MockApiService {
     }
 
     async registrarVoto(_eleicaoId: string, _categoriaId: string, _numeroVoto: string): Promise<string> {
-        await this.delay(1200);
         // Retorna hash simulado
         return '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
     }
@@ -160,12 +159,10 @@ export class MockApiService {
 
     // Admin methods
     async criarEleicao(eleicao: Eleicao): Promise<Eleicao> {
-        await this.delay(800);
         return eleicao;
     }
 
     async atualizarEleicao(id: string, eleicao: Partial<Eleicao>): Promise<Eleicao> {
-        await this.delay(800);
         const eleicoes = await this.buscarEleicoes();
         const eleicaoAtual = eleicoes.find(e => e.id === id);
         if (!eleicaoAtual) throw new Error('Eleição não encontrada');
@@ -173,7 +170,6 @@ export class MockApiService {
     }
 
     async deletarEleicao(id: string): Promise<void> {
-        await this.delay(600);
         console.log('Deletando eleição:', id);
     }
 
@@ -186,7 +182,6 @@ export class MockApiService {
     }
 
     async criarCandidato(_categoriaId: string, candidato: Candidato): Promise<Candidato> {
-        await this.delay(800);
         return candidato;
     }
 
