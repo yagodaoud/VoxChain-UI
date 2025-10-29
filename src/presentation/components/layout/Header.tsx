@@ -25,7 +25,14 @@ export const Header: React.FC<HeaderProps> = ({
         <header className="bg-[#071D41] text-white">
             <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                 <button
-                    onClick={() => navigate(backPath)}
+                    onClick={() => {
+                        if (showBackButton) {
+                            navigate(backPath);
+                            return;
+                        }
+                        const isAdminUser = usuario && (usuario.tipo === 'admin' || usuario.tipo === 'super-admin');
+                        navigate(isAdminUser ? '/admin' : '/eleicoes');
+                    }}
                     className="flex items-center gap-3 hover:opacity-80 transition"
                 >
                     <div className="w-10 h-10 bg-[#1351B4] rounded flex items-center justify-center font-bold text-xl">
