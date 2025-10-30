@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MockApiService } from '../data/api/MockApiService';
+import { ApiService } from '../data/api/ApiService';
 
 interface AdminStatsState {
     activeElectionsCount: number;
@@ -16,24 +16,22 @@ export function useAdminStats(cpf?: string): AdminStatsState {
 
     useEffect(() => {
         let isCancelled = false;
-        const service = new MockApiService();
+        const service = new ApiService();
 
         const load = async (): Promise<void> => {
             try {
-                const [elections, votes] = await Promise.all([
+                const [elections, votes, candidates] = await Promise.all([
                     service.buscarEleicoes(),
-                    service.buscarMeusVotos(cpf ?? '000.000.000-00')
+                    service.buscarVotos(),
+                    service.buscarCandidatos(),
                 ]);
 
                 if (isCancelled) return;
 
                 const active = elections.filter(e => e.status === 'ativa').length;
-                const candidates = elections.reduce((sum, election) => {
-                    return sum + election.categorias.reduce((inner, cat) => inner + cat.candidatos.length, 0);
-                }, 0);
 
                 setActiveElectionsCount(active);
-                setTotalCandidatesCount(candidates);
+                setTotalCandidatesCount(candidates.length);
                 setTotalVotesCount(votes.length);
             } finally {
                 if (!isCancelled) setIsLoading(false);

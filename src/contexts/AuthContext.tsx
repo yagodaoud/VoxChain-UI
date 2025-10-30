@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Usuario } from '../domain/usuario';
-import { MockApiService } from '../data/api/MockApiService';
+import { ApiService } from '../data/api/ApiService';
 
 export interface AuthContextType {
     usuario: Usuario | null;
@@ -17,7 +17,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
-    const apiService = new MockApiService();
+    const apiService = new ApiService();
 
     // Recupera usuário do localStorage ao montar
     useEffect(() => {

@@ -1,11 +1,14 @@
-import { Categoria } from './categoria';
+import { CategoriaEleicao } from './categoria';
 
 export interface Eleicao {
     id: string;
     nome: string;
     descricao: string;
-    dataInicio: Date;
-    dataFim: Date;
-    categorias: Categoria[];
-    status: 'futura' | 'ativa' | 'encerrada';
+    dataInicio: number;
+    dataFim: number;
+    dataInicioDate: Date;
+    dataFimDate: Date;
+    categorias: CategoriaEleicao[];
+    ativa: boolean;
+    status?: string;
 }

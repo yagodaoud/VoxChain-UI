@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Calendar, Vote } from 'lucide-react';
 import type { Eleicao } from '../../../domain/eleicao';
-import { MockApiService } from '../../../data/api/MockApiService';
+import { ApiService } from '../../../data/api/ApiService';
 import { Layout, GovButton, Loading, StatusBadge, Card, AdminSubHeader, ConfirmModal } from '../../components';
 import { formatarDataHoraLegivel } from '../../../utils/dateUtils';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export const AdminEleicoesPage: React.FC = () => {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
+    useAuth();
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleteModalOpen, setDeleteModalOpen] = useState<{ id: string; nome: string } | null>(null);
-    const api = new MockApiService();
+    const api = new ApiService();
 
     useEffect(() => {
         loadEleicoes();
@@ -44,9 +44,10 @@ export const AdminEleicoesPage: React.FC = () => {
 
     const getTotalCategorias = (eleicao: Eleicao) => eleicao.categorias.length;
 
-    const getTotalCandidatos = (eleicao: Eleicao) => {
-        return eleicao.categorias.reduce((total, cat) => total + cat.candidatos.length, 0);
-    };
+    const getTotalCandidatos = async (eleicao: Eleicao) => {
+        const candidatos = await api.buscarCandidatosPorEleicao(eleicao.id);
+        return candidatos.length;
+    }
 
     return (
         <Layout className="bg-[#F8F9FA]">
@@ -85,14 +86,14 @@ export const AdminEleicoesPage: React.FC = () => {
                                                 <Calendar size={18} />
                                                 <span className="text-sm">
                                                     <strong>Início:</strong>{' '}
-                                                    {formatarDataHoraLegivel(eleicao.dataInicio)}
+                                                    {formatarDataHoraLegivel(eleicao.dataInicioDate)}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-gray-600">
                                                 <Calendar size={18} />
                                                 <span className="text-sm">
                                                     <strong>Fim:</strong>{' '}
-                                                    {formatarDataHoraLegivel(eleicao.dataFim)}
+                                                    {formatarDataHoraLegivel(eleicao.dataFimDate)}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-gray-600">
@@ -156,12 +157,13 @@ export const AdminEleicoesPage: React.FC = () => {
             {/* Delete Confirmation Modal */}
             {deleteModalOpen && (
                 <ConfirmModal
+                    isOpen={!!deleteModalOpen}
                     title="Confirmar Exclusão"
                     message={`Tem certeza que deseja excluir a eleição "${deleteModalOpen.nome}"? Esta ação não pode ser desfeita.`}
                     confirmText="Deletar"
                     cancelText="Cancelar"
                     onConfirm={() => handleDelete(deleteModalOpen.id)}
-                    onCancel={() => setDeleteModalOpen(null)}
+                    onClose={() => setDeleteModalOpen(null)}
                 />
             )}
         </Layout>

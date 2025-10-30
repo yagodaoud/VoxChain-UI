@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard, AdminSubHeader, ElectionSuccessModal } from '../../../components';
 import { MultiSelectDropdown, DateTimeBRInput, parseDateTimeBR } from '../../../components/forms';
-import { MockApiService } from '../../../../data/api/MockApiService';
+import { ApiService } from '../../../../data/api/ApiService';
 import type { Eleicao } from '../../../../domain/eleicao';
 import type { Categoria } from '../../../../domain/categoria';
 import { CategoriaEleicao } from '../../../../domain/categoria';
@@ -11,7 +11,7 @@ import { CategoriaEleicao } from '../../../../domain/categoria';
 export const CriarEleicaoPage: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const api = new MockApiService();
+    const api = new ApiService();
     const isEdit = Boolean(id);
 
     const [nome, setNome] = useState('');

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, User, Hash, Users } from 'lucide-react';
-import { MockApiService } from '../../../data/api/MockApiService';
+import { ApiService } from '../../../data/api/ApiService';
 import { Layout, GovButton, Loading, Card, AdminSubHeader, ConfirmModal } from '../../components';
 import { useAuth } from '../../../contexts/AuthContext';
 import type { Candidato } from '../../../domain/candidato';
 
 export const AdminCandidatosPage: React.FC = () => {
     const navigate = useNavigate();
-    const { usuario } = useAuth();
+    useAuth();
     const [candidatos, setCandidatos] = useState<Candidato[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleteModalOpen, setDeleteModalOpen] = useState<{ id: string } | null>(null);
-    const api = new MockApiService();
+    const api = new ApiService();
 
     useEffect(() => {
         loadCandidatos();

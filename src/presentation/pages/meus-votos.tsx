@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, CheckCircle, FileText, Calendar, Users } from 'lucide-react';
-import { MockApiService } from '../../data/api/MockApiService';
+import { ApiService } from '../../data/api/ApiService';
 import { useAuth } from '../../contexts/AuthContext'
 import type { Voto } from '../../domain/voto';
 import { Layout, Loading, EmptyState, Card, SubHeader, SectionHeader } from '../components';
@@ -19,7 +19,7 @@ export const MeusVotosPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [eleicoesVisiveis, setEleicoesVisiveis] = useState<Set<string>>(new Set());
     const { usuario } = useAuth();
-    const api = new MockApiService();
+    const api = new ApiService();
 
     useEffect(() => {
         if (usuario) {

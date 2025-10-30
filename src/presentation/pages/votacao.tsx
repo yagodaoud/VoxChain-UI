@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { Eleicao } from '../../domain/eleicao';
-import { MockApiService } from '../../data/api/MockApiService';
+import { ApiService } from '../../data/api/ApiService';
 import type { Candidato } from '../../domain/candidato';
 import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal } from '../components';
 
@@ -18,7 +18,7 @@ export const VotacaoPage: React.FC = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [votando, setVotando] = useState(false);
-    const api = new MockApiService();
+    const api = new ApiService();
 
     useEffect(() => {
         api.buscarEleicoes().then(eleicoes => {

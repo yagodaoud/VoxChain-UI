@@ -1,4 +1,5 @@
 export interface Candidato {
+    eleicaoId: string;
     id: string;
     cargo: string;
     numero: string;

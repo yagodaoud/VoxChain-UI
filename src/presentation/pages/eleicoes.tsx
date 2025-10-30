@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Calendar, Vote } from 'lucide-react';
 import type { Eleicao } from '../../domain/eleicao';
-import { MockApiService } from '../../data/api/MockApiService';
+import { ApiService } from '../../data/api/ApiService';
 import { Layout, GovButton, Loading, StatusBadge, Card, SubHeader, EmptyState, SectionHeader } from '../components';
 import { ElectionTimer } from '../components/voting';
 import { formatarDataHoraLegivel } from '../../utils/dateUtils';
@@ -11,7 +11,7 @@ export const EleicoesPage: React.FC = () => {
     const navigate = useNavigate();
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);
-    const api = new MockApiService();
+    const api = new ApiService();
 
     useEffect(() => {
         api.buscarEleicoes().then(data => {

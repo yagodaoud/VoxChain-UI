@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard, AdminSubHeader, CandidateSuccessModal } from '../../../components';
-import { MockApiService } from '../../../../data/api/MockApiService';
+import { ApiService } from '../../../../data/api/ApiService';
 import type { Candidato } from '../../../../domain/candidato';
 import type { Eleicao } from '../../../../domain/eleicao';
 
 export const CriarCandidatoPage: React.FC = () => {
     const navigate = useNavigate();
-    const api = new MockApiService();
+    const api = new ApiService();
 
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ export const CriarCandidatoPage: React.FC = () => {
     const [partido, setPartido] = useState('');
     const [fotoUrl, setFotoUrl] = useState('');
     const [eleicaoSelecionada, setEleicaoSelecionada] = useState('');
-    const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
+    const [cargo, setCargo] = useState('');
     const [saving, setSaving] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -37,7 +37,7 @@ export const CriarCandidatoPage: React.FC = () => {
     };
 
     const eleicaoEscolhida = eleicoes.find(e => e.id === eleicaoSelecionada);
-    const categoriasDisponiveis = eleicaoEscolhida?.categorias || [];
+    const cargosDisponiveis = eleicaoEscolhida?.categorias || [];
 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
@@ -47,8 +47,13 @@ export const CriarCandidatoPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!categoriaSelecionada) {
-            alert('Selecione uma categoria');
+        if (!cargo) {
+            alert('Selecione um cargo');
+            return;
+        }
+
+        if (!eleicaoEscolhida) {
+            alert('Selecione uma eleição')
             return;
         }
 
@@ -57,7 +62,8 @@ export const CriarCandidatoPage: React.FC = () => {
         try {
             const novoCandidato: Candidato = {
                 id: '',
-                cargo: '',
+                eleicaoId: eleicaoEscolhida.id,
+                cargo,
                 uf: '',
                 numero,
                 nome,
@@ -65,7 +71,7 @@ export const CriarCandidatoPage: React.FC = () => {
                 fotoUrl
             };
 
-            await api.criarCandidato(categoriaSelecionada, novoCandidato);
+            await api.criarCandidato(novoCandidato);
             setShowSuccessModal(true);
         } catch (error) {
             console.error('Erro ao salvar candidato:', error);
@@ -118,7 +124,7 @@ export const CriarCandidatoPage: React.FC = () => {
                                     value={eleicaoSelecionada}
                                     onChange={(e) => {
                                         setEleicaoSelecionada(e.target.value);
-                                        setCategoriaSelecionada('');
+                                        setCargo('');
                                     }}
                                     className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-[#1351B4] focus:border-transparent outline-none"
                                     required
@@ -134,19 +140,19 @@ export const CriarCandidatoPage: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Selecionar Categoria
+                                    Selecionar Cargo
                                 </label>
                                 <select
-                                    value={categoriaSelecionada}
-                                    onChange={(e) => setCategoriaSelecionada(e.target.value)}
+                                    value={cargo}
+                                    onChange={(e) => setCargo(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-[#1351B4] focus:border-transparent outline-none"
                                     required
                                     disabled={!eleicaoSelecionada}
                                 >
-                                    <option value="">Selecione uma categoria</option>
-                                    {categoriasDisponiveis.map(categoria => (
-                                        <option key={categoria.id} value={categoria.id}>
-                                            {categoria.nome}
+                                    <option value="">Selecione um cargo</option>
+                                    {cargosDisponiveis.map(categoria => (
+                                        <option key={categoria} value={categoria}>
+                                            {categoria}
                                         </option>
                                     ))}
                                 </select>
