@@ -53,7 +53,7 @@ export const EleicoesPage: React.FC = () => {
                                             <span className="flex items-center gap-2">
                                                 <Calendar size={18} />
                                                 <span className="font-semibold">
-                                                    {formatarDataHoraLegivel(eleicao.dataInicio)} - {formatarDataHoraLegivel(eleicao.dataFim)}
+                                                    {formatarDataHoraLegivel(eleicao.dataInicioDate)} - {formatarDataHoraLegivel(eleicao.dataFimDate)}
                                                 </span>
                                             </span>
                                         </div>
@@ -61,9 +61,9 @@ export const EleicoesPage: React.FC = () => {
                                     <div className="flex flex-col items-end gap-3">
                                         <StatusBadge status={eleicao.status as 'ativa' | 'futura' | 'encerrada'} />
                                         <ElectionTimer
-                                            dataInicio={eleicao.dataInicio}
-                                            dataFim={eleicao.dataFim}
-                                            status={eleicao.status}
+                                            dataInicio={eleicao.dataInicioDate}
+                                            dataFim={eleicao.dataFimDate}
+                                            status={eleicao.status as 'ativa' | 'futura' | 'encerrada'}
                                         />
                                     </div>
                                 </div>

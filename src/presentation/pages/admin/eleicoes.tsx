@@ -12,6 +12,7 @@ export const AdminEleicoesPage: React.FC = () => {
     useAuth();
     const [eleicoes, setEleicoes] = useState<Eleicao[]>([]);
     const [loading, setLoading] = useState(true);
+    const [totalCandidatos, setTotalCandidatos] = useState<{ [key: string]: number }>({});
     const [deleteModalOpen, setDeleteModalOpen] = useState<{ id: string; nome: string } | null>(null);
     const api = new ApiService();
 
@@ -24,6 +25,21 @@ export const AdminEleicoesPage: React.FC = () => {
         try {
             const data = await api.buscarEleicoes();
             setEleicoes(data);
+
+            const candidatosPromises = data.map(async (eleicao) => {
+                const total = await getTotalCandidatos(eleicao);
+                return { id: eleicao.id, total };
+            });
+
+            const candidatosResult = await Promise.all(candidatosPromises);
+
+            const candidatosMap = candidatosResult.reduce((acc, { id, total }) => {
+                acc[id] = total;
+                return acc;
+            }, {} as { [key: string]: number });
+
+            setTotalCandidatos(candidatosMap);
+
         } catch (error) {
             console.error('Erro ao carregar eleições:', error);
         } finally {
@@ -106,7 +122,7 @@ export const AdminEleicoesPage: React.FC = () => {
 
                                         <div className="flex gap-2">
                                             <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                                                {getTotalCandidatos(eleicao)} candidatos
+                                                {totalCandidatos[eleicao.id] || 0} candidato(s)
                                             </div>
                                         </div>
                                     </div>
