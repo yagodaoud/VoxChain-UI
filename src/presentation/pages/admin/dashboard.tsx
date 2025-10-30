@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Users, Vote, Shield } from 'lucide-react';
+import { Users, Vote, Shield, IdCard } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Layout, Card, GovButton, StatCard } from '../../components';
 import { AdminSubHeader } from '../../components/layout';
@@ -17,22 +17,24 @@ export const AdminDashboardPage: React.FC = () => {
             description: 'Visualizar e criar novas eleições',
             icon: Vote,
             path: '/admin/eleicoes',
-            color: 'bg-[#1351B4]'
+            color: 'bg-[#1351B4]',
+            disabled: false
         },
         {
             title: 'Gerenciar Candidatos',
             description: 'Visualizar e criar candidatos',
             icon: Users,
             path: '/admin/candidatos',
-            color: 'bg-[#071D41]'
+            color: 'bg-[#071D41]',
+            disabled: false
         },
         {
-            title: 'Configurações',
-            description: 'Configurações do sistema',
-            icon: Settings,
-            path: '/admin/configuracoes',
+            title: 'Gerenciar Eleitores',
+            description: 'Visualizar e criar eleitores',
+            icon: IdCard,
+            path: '/admin/eleitores',
             color: 'bg-gray-600',
-            disabled: true
+            disabled: false
         }
     ];
 

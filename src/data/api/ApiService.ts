@@ -6,6 +6,7 @@ import { AuthService } from './services/AuthService';
 import { ElectionsService } from './services/ElectionsService';
 import { CandidatesService } from './services/CandidatesService';
 import { VotesService } from './services/VotesService';
+import { VotersService } from './services/VotersService';
 
 export class ApiService {
     private readonly baseUrl = '/api/v1';
@@ -14,6 +15,7 @@ export class ApiService {
     private readonly elections: ElectionsService;
     private readonly candidates: CandidatesService;
     private readonly votes: VotesService;
+    private readonly voters: VotersService;
 
     constructor() {
         const getHeaders = this.getAuthHeaders.bind(this);
@@ -21,6 +23,7 @@ export class ApiService {
         this.elections = new ElectionsService(this.baseUrl, getHeaders);
         this.candidates = new CandidatesService(this.baseUrl, getHeaders);
         this.votes = new VotesService();
+        this.voters = new VotersService(this.baseUrl, getHeaders);
     }
 
     private getAuthHeaders(): Record<string, string> {
@@ -89,6 +92,23 @@ export class ApiService {
 
     registrarVotosBatch(eleicaoId: string, votos: Array<{ categoriaId: string, numeroVoto: string }>): Promise<string> {
         return this.votes.registrarVotosBatch(eleicaoId, votos);
+    }
+
+    // Eleitores
+    listarEleitores() {
+        return this.voters.listar();
+    }
+
+    criarEleitor(eleitor: import('../../domain/eleitor').Eleitor) {
+        return this.voters.criar(eleitor);
+    }
+
+    atualizarEleitor(eleitor: import('../../domain/eleitor').Eleitor) {
+        return this.voters.atualizar(eleitor);
+    }
+
+    deletarEleitor(cpfHash: string) {
+        return this.voters.deletar(cpfHash);
     }
 }
 

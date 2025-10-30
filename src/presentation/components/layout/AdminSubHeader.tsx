@@ -45,6 +45,12 @@ export const AdminSubHeader: React.FC<AdminSubHeaderProps> = ({ className = '' }
                     >
                         Candidatos
                     </button>
+                    <button
+                        onClick={() => navigate('/admin/eleitores')}
+                        className={getButtonClasses('/admin/eleitores')}
+                    >
+                        Eleitores
+                    </button>
                 </div>
             </div>
         </div>

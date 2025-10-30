@@ -11,6 +11,8 @@ import { AdminEleicoesPage } from '../src/presentation/pages/admin/eleicoes'
 import { CriarEleicaoPage } from '../src/presentation/pages/admin/eleicoes/criar'
 import { AdminCandidatosPage } from '../src/presentation/pages/admin/candidatos'
 import { CriarCandidatoPage } from '../src/presentation/pages/admin/candidatos/criar'
+import { AdminEleitoresPage } from '../src/presentation/pages/admin/eleitores'
+import { CriarEleitorPage } from '../src/presentation/pages/admin/eleitores/criar'
 
 // Componente para rotas protegidas
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -109,6 +111,30 @@ function AppRoutes() {
                     element={
                         <AdminProtectedRoute>
                             <CriarCandidatoPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleitores"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminEleitoresPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleitores/criar"
+                    element={
+                        <AdminProtectedRoute>
+                            <CriarEleitorPage />
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/eleitores/editar/:cpfHash"
+                    element={
+                        <AdminProtectedRoute>
+                            <CriarEleitorPage />
                         </AdminProtectedRoute>
                     }
                 />
