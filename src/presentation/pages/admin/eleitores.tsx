@@ -13,6 +13,12 @@ export const AdminEleitoresPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [deleteModalOpen, setDeleteModalOpen] = useState<string | null>(null);
 
+    const shortenHash = (hash: string, prefix: number = 6, suffix: number = 4) => {
+        if (!hash) return '';
+        if (hash.length <= prefix + suffix) return hash;
+        return `${hash.slice(0, prefix)}...${hash.slice(-suffix)}`;
+    };
+
     useEffect(() => {
         load();
     }, []);
@@ -77,7 +83,7 @@ export const AdminEleitoresPage: React.FC = () => {
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <IdCard className="text-gray-600" size={18} />
-                                        <span className="text-sm text-gray-500 break-all">{e.cpfHash}</span>
+                                        <span className="text-sm text-gray-500 break-all">{shortenHash(e.cpfHash)}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button

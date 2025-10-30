@@ -99,7 +99,7 @@ export class ApiService {
         return this.voters.listar();
     }
 
-    criarEleitor(eleitor: import('../../domain/eleitor').Eleitor) {
+    criarEleitor(eleitor: { cpf: string, zona: number, secao: number, senha?: string }) {
         return this.voters.criar(eleitor);
     }
 

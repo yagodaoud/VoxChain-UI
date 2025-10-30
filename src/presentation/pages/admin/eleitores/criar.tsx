@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard, AdminSubHeader, SuccessModal } from '../../../components';
 import { ApiService } from '../../../../data/api/ApiService';
 import type { Eleitor } from '../../../../domain/eleitor';
-import { hashCpf } from '../../../../utils/hashUtils';
+import { formatCPF } from '../../../../utils/cpfUtils';
 
 export const CriarEleitorPage: React.FC = () => {
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ export const CriarEleitorPage: React.FC = () => {
     const [cpf, setCpf] = useState('');
     const [zona, setZona] = useState('');
     const [secao, setSecao] = useState('');
+    const [senha, setSenha] = useState('');
     const [saving, setSaving] = useState(false);
     const [loadingEdit, setLoadingEdit] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -50,7 +51,7 @@ export const CriarEleitorPage: React.FC = () => {
         e.preventDefault();
         setSaving(true);
         try {
-            let payload: Eleitor;
+            let payload: Eleitor & { senha?: string } | { cpf: string, zona: number, secao: number, senha?: string };
             if (isEdit && cpfHash) {
                 payload = {
                     cpfHash,
@@ -59,11 +60,12 @@ export const CriarEleitorPage: React.FC = () => {
                 };
                 await api.atualizarEleitor(payload);
             } else {
-                const cpfHashed = await hashCpf(cpf);
+                const onlyDigitsCpf = cpf.replace(/\D/g, '');
                 payload = {
-                    cpfHash: cpfHashed,
+                    cpf: onlyDigitsCpf,
                     zona: Number(zona),
-                    secao: Number(secao)
+                    secao: Number(secao),
+                    senha
                 };
                 await api.criarEleitor(payload);
             }
@@ -105,8 +107,18 @@ export const CriarEleitorPage: React.FC = () => {
                                 <Input
                                     label="CPF"
                                     value={cpf}
-                                    onChange={setCpf}
+                                    onChange={(val) => setCpf(formatCPF(val, cpf))}
                                     placeholder="Digite o CPF do eleitor"
+                                    required
+                                />
+                            )}
+                            {!isEdit && (
+                                <Input
+                                    label="Senha"
+                                    type="password"
+                                    value={senha}
+                                    onChange={setSenha}
+                                    placeholder="Defina a senha do eleitor"
                                     required
                                 />
                             )}
@@ -144,7 +156,7 @@ export const CriarEleitorPage: React.FC = () => {
                 isOpen={showSuccess}
                 onClose={closeSuccess}
                 title={isEdit ? 'Eleitor atualizado com sucesso!' : 'Eleitor criado com sucesso!'}
-                description="A operação foi concluída."
+                message="A operação foi concluída."
                 onConfirm={closeSuccess}
             />
         </Layout>

@@ -12,7 +12,7 @@ export class VotersService {
 
     async listar(): Promise<Eleitor[]> {
         try {
-            const response = await axios.get<Eleitor[]>(`${this.baseUrl}/eleitor/listar`, { headers: this.getAuthHeaders() });
+            const response = await axios.get<Eleitor[]>(`${this.baseUrl}/eleitores/listar`, { headers: this.getAuthHeaders() });
             return response.data;
         } catch (error) {
             console.error('Erro ao listar eleitores:', error);
@@ -20,13 +20,13 @@ export class VotersService {
         }
     }
 
-    async criar(eleitor: Eleitor): Promise<Eleitor> {
+    async criar(eleitor: { cpf: string, zona: number, secao: number, senha?: string }): Promise<Eleitor> {
         try {
-            const response = await axios.post<Eleitor>(`${this.baseUrl}/eleitor/criar`, eleitor, { headers: this.getAuthHeaders() });
+            const response = await axios.post<Eleitor>(`${this.baseUrl}/eleitores/criar`, eleitor, { headers: this.getAuthHeaders() });
             return response.data;
         } catch (error) {
             console.error('Erro ao criar eleitor:', error);
-            return eleitor;
+            throw error;
         }
     }
 
