@@ -7,6 +7,7 @@ interface DateTimeBRInputProps {
     placeholder?: string;
     required?: boolean;
     className?: string;
+    disabled?: boolean;
 }
 
 // Aceita e exibe "dd/MM/yyyy HH:mm"
@@ -16,7 +17,8 @@ export const DateTimeBRInput: React.FC<DateTimeBRInputProps> = ({
     onChange,
     placeholder = 'dd/mm/aaaa hh:mm',
     required,
-    className
+    className,
+    disabled = false
 }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value;
@@ -36,6 +38,7 @@ export const DateTimeBRInput: React.FC<DateTimeBRInputProps> = ({
                 onChange={handleChange}
                 placeholder={placeholder}
                 required={required}
+                disabled={disabled}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1351B4] focus:border-[#1351B4]"
                 inputMode="numeric"
                 aria-label={label}

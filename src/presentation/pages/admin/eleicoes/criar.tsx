@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard, AdminSubHeader, ElectionSuccessModal } from '../../../components';
@@ -7,6 +7,7 @@ import { ApiService } from '../../../../data/api/ApiService';
 import type { Eleicao } from '../../../../domain/eleicao';
 import type { Categoria } from '../../../../domain/categoria';
 import { CategoriaEleicao } from '../../../../domain/categoria';
+import { formatarDataHoraBrasileira } from '../../../../utils/dateUtils';
 
 export const CriarEleicaoPage: React.FC = () => {
     const navigate = useNavigate();
@@ -21,9 +22,68 @@ export const CriarEleicaoPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [carregandoEdicao, setCarregandoEdicao] = useState(false);
+    const [canEdit, setCanEdit] = useState(true);
+
+    // Memoized helper to map enum string to Categoria
+    const mapEnumToCategoria = (value: string): Categoria => ({
+        id: `cat-${value}`,
+        nome: value,
+        candidatos: []
+    });
+
+    useEffect(() => {
+        const carregarParaEdicao = async () => {
+            if (!isEdit || !id) return;
+            setCarregandoEdicao(true);
+            try {
+                const lista = await api.buscarEleicoes();
+                const existente = lista.find(e => e.id === id);
+                if (!existente) {
+                    alert('Eleição não encontrada');
+                    navigate('/admin/eleicoes');
+                    return;
+                }
+
+                // Preenche campos
+                setNome(existente.nome || '');
+                setDescricao(existente.descricao || '');
+
+                const inicioDate = existente.dataInicioDate || new Date((existente.dataInicio || 0) * 1000);
+                const fimDate = existente.dataFimDate || new Date((existente.dataFim || 0) * 1000);
+
+                setDataInicioBr(inicioDate ? formatarDataHoraBrasileira(inicioDate) : '');
+                setDataFimBr(fimDate ? formatarDataHoraBrasileira(fimDate) : '');
+
+                // Categoria pode vir como enum; normaliza para o formato do formulário
+                const categoriasNormalizadas: Categoria[] = Array.isArray(existente.categorias)
+                    ? (existente.categorias as unknown as string[]).map(mapEnumToCategoria)
+                    : [];
+                setCategorias(categoriasNormalizadas);
+
+                // Permite edição somente se ainda não iniciou
+                const agora = new Date();
+                const jaIniciou = inicioDate && agora >= inicioDate;
+                setCanEdit(!jaIniciou && existente.status !== 'ativa' && existente.status !== 'encerrada');
+            } catch (err) {
+                console.error('Erro ao carregar eleição para edição:', err);
+                alert('Erro ao carregar dados da eleição');
+                navigate('/admin/eleicoes');
+            } finally {
+                setCarregandoEdicao(false);
+            }
+        };
+
+        carregarParaEdicao();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEdit, id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isEdit && !canEdit) {
+            alert('Edição não permitida: a eleição já foi iniciada.');
+            return;
+        }
         setLoading(true);
 
         try {
@@ -36,10 +96,13 @@ export const CriarEleicaoPage: React.FC = () => {
                 id: id || Date.now().toString(),
                 nome,
                 descricao,
-                dataInicio: parsedInicio,
-                dataFim: parsedFim,
-                categorias,
-                status: 'futura'
+                dataInicio: parsedInicio.getTime(),
+                dataFim: parsedFim.getTime(),
+                categorias: categorias.map(c => c.nome as unknown as CategoriaEleicao),
+                status: 'futura',
+                dataInicioDate: parsedInicio,
+                dataFimDate: parsedFim,
+                ativa: false
             };
 
             if (isEdit) {
@@ -105,6 +168,7 @@ export const CriarEleicaoPage: React.FC = () => {
                                 onChange={setNome}
                                 placeholder="Ex: Eleições Gerais 2025"
                                 required
+                                disabled={isEdit && !canEdit}
                             />
 
                             <Input
@@ -113,6 +177,7 @@ export const CriarEleicaoPage: React.FC = () => {
                                 onChange={setDescricao}
                                 placeholder="Descrição detalhada da eleição"
                                 required
+                                disabled={isEdit && !canEdit}
                             />
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,6 +186,10 @@ export const CriarEleicaoPage: React.FC = () => {
                                     value={dataInicioBr}
                                     onChange={setDataInicioBr}
                                     required
+                                    className=""
+                                    // Desabilita edição se já iniciou
+                                    // @ts-ignore - componente não tipa disabled, mas passamos atributo nativo
+                                    disabled={isEdit && !canEdit}
                                 />
 
                                 <DateTimeBRInput
@@ -128,6 +197,9 @@ export const CriarEleicaoPage: React.FC = () => {
                                     value={dataFimBr}
                                     onChange={setDataFimBr}
                                     required
+                                    className=""
+                                    // @ts-ignore
+                                    disabled={isEdit && !canEdit}
                                 />
                             </div>
                         </div>
@@ -141,11 +213,18 @@ export const CriarEleicaoPage: React.FC = () => {
                                 options={Object.values(CategoriaEleicao).map(v => ({ label: v.replace(/_/g, ' '), value: v }))}
                                 selected={categorias.map(c => c.nome)}
                                 onChange={onSelecionarCategorias}
+                                // @ts-ignore
+                                disabled={isEdit && !canEdit}
                             />
 
                             {categorias.length === 0 && (
                                 <p className="text-gray-500 text-center py-4">
                                     Selecione ao menos uma categoria
+                                </p>
+                            )}
+                            {isEdit && !canEdit && (
+                                <p className="text-red-600 text-sm text-center">
+                                    Edição bloqueada: a eleição já foi iniciada ou encerrada.
                                 </p>
                             )}
                         </div>
@@ -156,7 +235,7 @@ export const CriarEleicaoPage: React.FC = () => {
                         <GovButton
                             type="submit"
                             disabled={
-                                loading ||
+                                loading || carregandoEdicao || (isEdit && !canEdit) ||
                                 categorias.length === 0 ||
                                 !parseDateTimeBR(dataInicioBr) ||
                                 !parseDateTimeBR(dataFimBr)

@@ -9,6 +9,7 @@ interface InputProps {
     required?: boolean;
     error?: string;
     className?: string;
+    disabled?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -19,7 +20,8 @@ export const Input: React.FC<InputProps> = ({
     placeholder,
     required = false,
     error,
-    className = ''
+    className = '',
+    disabled = false
 }) => {
     return (
         <div className={className}>
@@ -32,9 +34,10 @@ export const Input: React.FC<InputProps> = ({
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 required={required}
+                disabled={disabled}
                 className={`
                     w-full px-4 py-3 border rounded focus:ring-2 focus:ring-[#1351B4] focus:border-transparent outline-none
-                    ${error ? 'border-red-500' : 'border-gray-300'}
+                    ${error ? 'border-red-500' : 'border-gray-300'} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
                 `}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}

@@ -9,6 +9,7 @@ interface MultiSelectDropdownProps {
     selected: string[];
     onChange: (selected: string[]) => void;
     className?: string;
+    disabled?: boolean;
 }
 
 export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
@@ -17,7 +18,8 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     options,
     selected,
     onChange,
-    className
+    className,
+    disabled = false
 }) => {
     const [open, setOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -56,12 +58,13 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
             )}
             <div
-                className={`w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-[#1351B4] focus-within:border-[#1351B4] transition`}
+                className={`w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-[#1351B4] focus-within:border-[#1351B4] transition ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             >
                 <button
                     type="button"
-                    onClick={() => setOpen(o => !o)}
+                    onClick={() => { if (!disabled) setOpen(o => !o); }}
                     className="w-full text-left flex items-center justify-between"
+                    disabled={disabled}
                 >
                     <div className="flex gap-2 flex-wrap">
                         {selectedOptions.length === 0 ? (
@@ -75,9 +78,10 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                                     {opt.label}
                                     <button
                                         type="button"
-                                        onClick={(e) => { e.stopPropagation(); removeValue(opt.value); }}
+                                        onClick={(e) => { e.stopPropagation(); if (!disabled) removeValue(opt.value); }}
                                         className="text-gray-500 hover:text-gray-700"
                                         aria-label={`Remover ${opt.label}`}
+                                        disabled={disabled}
                                     >
                                         ×
                                     </button>
@@ -96,7 +100,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                 </button>
             </div>
 
-            {open && (
+            {open && !disabled && (
                 <div className="mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-56 overflow-auto z-10">
                     <ul className="py-1">
                         {options.map(opt => {
