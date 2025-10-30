@@ -5,6 +5,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { Layout, Card, GovButton, StatCard } from '../../components';
 import { AdminSubHeader } from '../../components/layout';
 import { useAdminStats } from '../../../hooks/useAdminStats';
+import { formatCPF } from '../../../utils/cpfUtils';
 
 export const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
@@ -52,7 +53,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <h1 className="text-4xl font-bold text-gray-800">Painel Administrativo</h1>
                     </div>
                     <p className="text-gray-600">
-                        Bem-vindo, <span className="font-semibold">{usuario?.nome}</span>
+                        Bem-vindo, <span className="font-semibold">{formatCPF(usuario?.cpf || '')}</span>
                         {usuario?.tipo === 'super-admin' && (
                             <span className="ml-2 px-2 py-1 bg-[#1351B4] text-white text-xs rounded">
                                 Super Admin

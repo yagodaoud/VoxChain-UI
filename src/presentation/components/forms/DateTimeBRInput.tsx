@@ -47,7 +47,7 @@ export const DateTimeBRInput: React.FC<DateTimeBRInputProps> = ({
     );
 };
 
-function formatAsMask(input: string): string {
+export function formatAsMask(input: string): string {
     // Aplica máscara incremental: dd/MM/yyyy HH:mm
     const digits = input.replace(/[^0-9]/g, '');
     const parts: string[] = [];

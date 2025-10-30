@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { Layout, GovButton, Input, FormCard } from '../components';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatCPF } from '../../utils/cpfUtils';
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -42,16 +43,7 @@ export const LoginPage: React.FC = () => {
         }
     };
 
-    const formatCPF = (value: string) => {
-        const numbers = value.replace(/\D/g, '');
-        if (numbers.length <= 11) {
-            return numbers
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        }
-        return cpf;
-    };
+
 
     return (
         <Layout
@@ -71,7 +63,7 @@ export const LoginPage: React.FC = () => {
                         <Input
                             label="CPF"
                             value={cpf}
-                            onChange={(value) => setCpf(formatCPF(value))}
+                            onChange={(value) => setCpf(formatCPF(value, cpf))}
                             placeholder="000.000.000-00"
                             required
                         />

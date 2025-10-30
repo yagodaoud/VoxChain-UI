@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { GovButton } from '../ui';
+import { formatCPF } from '../../../utils/cpfUtils';
 
 interface HeaderProps {
     showUserActions?: boolean;
@@ -51,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
                         {usuario ? (
                             <>
                                 <div className="text-sm text-gray-200 hidden sm:block">
-                                    Olá, {usuario.nome}
+                                    Olá, {formatCPF(usuario.cpf || '')}
                                 </div>
                                 <button
                                     onClick={() => { logout(); navigate('/'); }}
