@@ -83,9 +83,8 @@ export class ElectionsService {
         console.log('Deletando eleição:', id);
     }
 
-    private categoriasParaEnumStrings(categorias: Categoria[]): string[] {
+    private categoriasParaEnumStrings(categorias: CategoriaEleicao[]): string[] {
         return categorias
-            .map(c => c.nome)
             .map(nome => this.normalizarParaEnum(nome))
             .filter(Boolean) as string[];
     }
