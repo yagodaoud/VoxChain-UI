@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Users, Trash2, IdCard, FileText } from 'lucide-react';
-import { Layout, GovButton, Card, Loading, AdminSubHeader, ConfirmModal, EmptyState } from '../../components';
+import { Layout, GovButton, Card, Loading, AdminSubHeader, ConfirmModal, EmptyState, ErrorModal } from '../../components';
 import { ApiService } from '../../../data/api/ApiService';
 import type { Eleitor } from '../../../domain/eleitor';
+import { getErrorMessage } from '../../../utils/errorUtils';
 
 export const AdminEleitoresPage: React.FC = () => {
     const navigate = useNavigate();
@@ -12,6 +13,8 @@ export const AdminEleitoresPage: React.FC = () => {
     const [eleitores, setEleitores] = useState<Eleitor[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleteModalOpen, setDeleteModalOpen] = useState<string | null>(null);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const shortenHash = (hash: string, prefix: number = 6, suffix: number = 4) => {
         if (!hash) return '';
@@ -43,7 +46,9 @@ export const AdminEleitoresPage: React.FC = () => {
             await load();
         } catch (error) {
             console.error('Erro ao deletar eleitor:', error);
-            alert('Erro ao deletar eleitor');
+            const errorMsg = getErrorMessage(error, 'Erro ao deletar eleitor');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         }
     };
 
@@ -121,6 +126,13 @@ export const AdminEleitoresPage: React.FC = () => {
                     onConfirm={onDelete}
                 />
             )}
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
+            />
         </Layout>
     );
 };

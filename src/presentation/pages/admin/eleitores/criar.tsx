@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Layout, GovButton, Input, FormCard, AdminSubHeader, SuccessModal } from '../../../components';
+import { Layout, GovButton, Input, FormCard, AdminSubHeader, SuccessModal, ErrorModal } from '../../../components';
 import { ApiService } from '../../../../data/api/ApiService';
 import type { Eleitor } from '../../../../domain/eleitor';
 import { formatCPF } from '../../../../utils/cpfUtils';
+import { getErrorMessage } from '../../../../utils/errorUtils';
 
 export const CriarEleitorPage: React.FC = () => {
     const navigate = useNavigate();
@@ -19,6 +20,8 @@ export const CriarEleitorPage: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [loadingEdit, setLoadingEdit] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         const carregar = async () => {
@@ -28,8 +31,11 @@ export const CriarEleitorPage: React.FC = () => {
                 const lista = await api.listarEleitores();
                 const existente = lista.find(e => e.cpfHash === cpfHash);
                 if (!existente) {
-                    alert('Eleitor não encontrado');
-                    navigate('/admin/eleitores');
+                    setErrorMessage('Eleitor não encontrado');
+                    setShowErrorModal(true);
+                    setTimeout(() => {
+                        navigate('/admin/eleitores');
+                    }, 2000);
                     return;
                 }
                 setCpf('');
@@ -37,8 +43,12 @@ export const CriarEleitorPage: React.FC = () => {
                 setSecao(String(existente.secao));
             } catch (e) {
                 console.error('Erro ao carregar eleitor:', e);
-                alert('Erro ao carregar eleitor');
-                navigate('/admin/eleitores');
+                const errorMsg = getErrorMessage(e, 'Erro ao carregar eleitor');
+                setErrorMessage(errorMsg);
+                setShowErrorModal(true);
+                setTimeout(() => {
+                    navigate('/admin/eleitores');
+                }, 2000);
             } finally {
                 setLoadingEdit(false);
             }
@@ -72,7 +82,9 @@ export const CriarEleitorPage: React.FC = () => {
             setShowSuccess(true);
         } catch (error) {
             console.error('Erro ao salvar eleitor:', error);
-            alert('Erro ao salvar eleitor');
+            const errorMsg = getErrorMessage(error, 'Erro ao salvar eleitor');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         } finally {
             setSaving(false);
         }
@@ -158,6 +170,13 @@ export const CriarEleitorPage: React.FC = () => {
                 title={isEdit ? 'Eleitor atualizado com sucesso!' : 'Eleitor criado com sucesso!'}
                 message="A operação foi concluída."
                 onConfirm={closeSuccess}
+            />
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
             />
         </Layout>
     );

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Layout, GovButton, Input, FormCard, AdminSubHeader, ElectionSuccessModal } from '../../../components';
+import { Layout, GovButton, Input, FormCard, AdminSubHeader, ElectionSuccessModal, ErrorModal } from '../../../components';
 import { MultiSelectDropdown, DateTimeBRInput, parseDateTimeBR } from '../../../components/forms';
 import { ApiService } from '../../../../data/api/ApiService';
 import type { Eleicao } from '../../../../domain/eleicao';
 import type { Categoria } from '../../../../domain/categoria';
 import { CategoriaEleicao } from '../../../../domain/categoria';
 import { formatarDataHoraBrasileira } from '../../../../utils/dateUtils';
+import { getErrorMessage } from '../../../../utils/errorUtils';
 
 export const CriarEleicaoPage: React.FC = () => {
     const navigate = useNavigate();
@@ -24,6 +25,8 @@ export const CriarEleicaoPage: React.FC = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [carregandoEdicao, setCarregandoEdicao] = useState(false);
     const [canEdit, setCanEdit] = useState(true);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Memoized helper to map enum string to Categoria
     const mapEnumToCategoria = (value: string): Categoria => ({
@@ -40,8 +43,11 @@ export const CriarEleicaoPage: React.FC = () => {
                 const lista = await api.buscarEleicoes();
                 const existente = lista.find(e => e.id === id);
                 if (!existente) {
-                    alert('Eleição não encontrada');
-                    navigate('/admin/eleicoes');
+                    setErrorMessage('Eleição não encontrada');
+                    setShowErrorModal(true);
+                    setTimeout(() => {
+                        navigate('/admin/eleicoes');
+                    }, 2000);
                     return;
                 }
 
@@ -67,8 +73,12 @@ export const CriarEleicaoPage: React.FC = () => {
                 setCanEdit(!jaIniciou && existente.status !== 'ativa' && existente.status !== 'encerrada');
             } catch (err) {
                 console.error('Erro ao carregar eleição para edição:', err);
-                alert('Erro ao carregar dados da eleição');
-                navigate('/admin/eleicoes');
+                const errorMsg = getErrorMessage(err, 'Erro ao carregar dados da eleição');
+                setErrorMessage(errorMsg);
+                setShowErrorModal(true);
+                setTimeout(() => {
+                    navigate('/admin/eleicoes');
+                }, 2000);
             } finally {
                 setCarregandoEdicao(false);
             }
@@ -81,7 +91,8 @@ export const CriarEleicaoPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isEdit && !canEdit) {
-            alert('Edição não permitida: a eleição já foi iniciada.');
+            setErrorMessage('Edição não permitida: a eleição já foi iniciada.');
+            setShowErrorModal(true);
             return;
         }
         setLoading(true);
@@ -114,7 +125,9 @@ export const CriarEleicaoPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Erro ao salvar eleição:', error);
-            alert('Erro ao salvar eleição');
+            const errorMsg = getErrorMessage(error, 'Erro ao salvar eleição');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         } finally {
             setLoading(false);
         }
@@ -262,6 +275,13 @@ export const CriarEleicaoPage: React.FC = () => {
                 onClose={handleSuccessModalClose}
                 eleicaoNome={nome}
                 onConfirm={handleSuccessModalClose}
+            />
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
             />
         </Layout>
     );

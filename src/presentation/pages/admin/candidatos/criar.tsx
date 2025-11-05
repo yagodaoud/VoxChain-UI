@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Layout, GovButton, Input, FormCard, AdminSubHeader, CandidateSuccessModal } from '../../../components';
+import { Layout, GovButton, Input, FormCard, AdminSubHeader, CandidateSuccessModal, ErrorModal } from '../../../components';
 import { ApiService } from '../../../../data/api/ApiService';
 import type { Candidato } from '../../../../domain/candidato';
 import type { Eleicao } from '../../../../domain/eleicao';
+import { getErrorMessage } from '../../../../utils/errorUtils';
 
 export const CriarCandidatoPage: React.FC = () => {
     const navigate = useNavigate();
@@ -20,6 +21,8 @@ export const CriarCandidatoPage: React.FC = () => {
     const [cargo, setCargo] = useState('');
     const [saving, setSaving] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         loadEleicoes();
@@ -48,12 +51,14 @@ export const CriarCandidatoPage: React.FC = () => {
         e.preventDefault();
 
         if (!cargo) {
-            alert('Selecione um cargo');
+            setErrorMessage('Selecione um cargo');
+            setShowErrorModal(true);
             return;
         }
 
         if (!eleicaoEscolhida) {
-            alert('Selecione uma eleição')
+            setErrorMessage('Selecione uma eleição');
+            setShowErrorModal(true);
             return;
         }
 
@@ -75,7 +80,9 @@ export const CriarCandidatoPage: React.FC = () => {
             setShowSuccessModal(true);
         } catch (error) {
             console.error('Erro ao salvar candidato:', error);
-            alert('Erro ao salvar candidato');
+            const errorMsg = getErrorMessage(error, 'Erro ao salvar candidato');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         } finally {
             setSaving(false);
         }
@@ -223,6 +230,13 @@ export const CriarCandidatoPage: React.FC = () => {
                 onClose={handleSuccessModalClose}
                 candidatoNome={nome}
                 onConfirm={handleSuccessModalClose}
+            />
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
             />
         </Layout>
     );

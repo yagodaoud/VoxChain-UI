@@ -8,6 +8,7 @@ export { VotingSuccessModal } from './VotingSuccessModal';
 export { ElectionSuccessModal } from './ElectionSuccessModal';
 export { CandidateSuccessModal } from './CandidateSuccessModal';
 export { ConfirmModal } from './ConfirmModal';
+export { ErrorModal } from './ErrorModal';
 export { StatCard } from './StatCard';
 export { SectionHeader } from './SectionHeader';
 export { Accordion } from './Accordion';

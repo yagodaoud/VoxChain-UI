@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Calendar, Vote } from 'lucide-react';
 import type { Eleicao } from '../../../domain/eleicao';
 import { ApiService } from '../../../data/api/ApiService';
-import { Layout, GovButton, Loading, StatusBadge, Card, AdminSubHeader, ConfirmModal } from '../../components';
+import { Layout, GovButton, Loading, StatusBadge, Card, AdminSubHeader, ConfirmModal, ErrorModal } from '../../components';
 import { formatarDataHoraLegivel } from '../../../utils/dateUtils';
 import { useAuth } from '../../../contexts/AuthContext';
+import { getErrorMessage } from '../../../utils/errorUtils';
 
 export const AdminEleicoesPage: React.FC = () => {
     const navigate = useNavigate();
@@ -14,6 +15,8 @@ export const AdminEleicoesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [totalCandidatos, setTotalCandidatos] = useState<{ [key: string]: number }>({});
     const [deleteModalOpen, setDeleteModalOpen] = useState<{ id: string; nome: string } | null>(null);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const api = new ApiService();
 
     useEffect(() => {
@@ -54,7 +57,9 @@ export const AdminEleicoesPage: React.FC = () => {
             setDeleteModalOpen(null);
         } catch (error) {
             console.error('Erro ao deletar eleição:', error);
-            alert('Erro ao deletar eleição');
+            const errorMsg = getErrorMessage(error, 'Erro ao deletar eleição');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         }
     };
 
@@ -182,6 +187,13 @@ export const AdminEleicoesPage: React.FC = () => {
                     onClose={() => setDeleteModalOpen(null)}
                 />
             )}
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
+            />
         </Layout>
     );
 };

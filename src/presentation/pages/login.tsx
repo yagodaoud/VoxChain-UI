@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
-import { Layout, GovButton, Input, FormCard } from '../components';
+import { Layout, GovButton, Input, FormCard, ErrorModal } from '../components';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCPF } from '../../utils/cpfUtils';
+import { getErrorMessage } from '../../utils/errorUtils';
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const { login, isAuthenticated } = useAuth();
 
     // Redireciona se já estiver logado
@@ -37,7 +40,9 @@ export const LoginPage: React.FC = () => {
                 navigate('/eleicoes');
             }
         } catch (error) {
-            alert('Erro ao fazer login');
+            const errorMsg = getErrorMessage(error, 'Erro ao fazer login');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         } finally {
             setLoading(false);
         }
@@ -89,6 +94,13 @@ export const LoginPage: React.FC = () => {
                     </div>
                 </FormCard>
             </div>
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro ao fazer login"
+                message={errorMessage}
+            />
         </Layout>
     );
 };

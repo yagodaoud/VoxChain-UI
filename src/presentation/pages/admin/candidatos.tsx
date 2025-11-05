@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, User, Hash, Users } from 'lucide-react';
 import { ApiService } from '../../../data/api/ApiService';
-import { Layout, GovButton, Loading, Card, AdminSubHeader, ConfirmModal, Accordion } from '../../components';
+import { Layout, GovButton, Loading, Card, AdminSubHeader, ConfirmModal, Accordion, ErrorModal } from '../../components';
 import { useAuth } from '../../../contexts/AuthContext';
 import type { Candidato } from '../../../domain/candidato';
 import type { Eleicao } from '../../../domain/eleicao';
+import { getErrorMessage } from '../../../utils/errorUtils';
 
 export const AdminCandidatosPage: React.FC = () => {
     const navigate = useNavigate();
@@ -15,6 +16,8 @@ export const AdminCandidatosPage: React.FC = () => {
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
     const [deleteModalOpen, setDeleteModalOpen] = useState<{ id: string } | null>(null);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const api = new ApiService();
 
     useEffect(() => {
@@ -63,7 +66,9 @@ export const AdminCandidatosPage: React.FC = () => {
             setDeleteModalOpen(null);
         } catch (error) {
             console.error('Erro ao deletar candidato:', error);
-            alert('Erro ao deletar candidato');
+            const errorMsg = getErrorMessage(error, 'Erro ao deletar candidato');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         }
     };
 
@@ -174,6 +179,13 @@ export const AdminCandidatosPage: React.FC = () => {
                     onConfirm={handleDelete}
                 />
             )}
+
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                title="Erro"
+                message={errorMessage}
+            />
         </Layout>
     );
 };

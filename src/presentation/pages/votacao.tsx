@@ -4,8 +4,9 @@ import type { Eleicao } from '../../domain/eleicao';
 import { ApiService } from '../../data/api/ApiService';
 import type { Candidato } from '../../domain/candidato';
 import type { Categoria } from '../../domain/categoria';
-import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal, TokenConfirmation } from '../components';
+import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal, TokenConfirmation, ErrorModal } from '../components';
 import { VoteConfirmModal } from '../components/voting/VoteConfirmModal';
+import { getErrorMessage } from '../../utils/errorUtils';
 import axios from 'axios';
 
 interface TokenVotacao {
@@ -74,6 +75,8 @@ export const VotacaoPage: React.FC = () => {
     const [tokenValidoAte, setTokenValidoAte] = useState<number>(0);
     const [gerandoToken, setGerandoToken] = useState(false);
     const [tokenConfirmado, setTokenConfirmado] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const api = new ApiService();
 
     useEffect(() => {
@@ -154,8 +157,9 @@ export const VotacaoPage: React.FC = () => {
                     }
                 }
                 // Se não conseguiu usar token do localStorage, mostra erro
-                alert('Erro ao gerar token. Você já pode ter votado nesta eleição.');
-                navigate('/eleicoes');
+                const errorMsg = getErrorMessage(error, 'Erro ao gerar token. Você já pode ter votado nesta eleição.');
+                setErrorMessage(errorMsg);
+                setShowErrorModal(true);
             } finally {
                 setGerandoToken(false);
             }
@@ -199,7 +203,8 @@ export const VotacaoPage: React.FC = () => {
 
         // Valida se um voto foi selecionado (candidato ou branco)
         if (!votandoEmBranco && !candidatoSelecionado) {
-            alert('Por favor, selecione um candidato ou clique em BRANCO antes de confirmar.');
+            setErrorMessage('Por favor, selecione um candidato ou clique em BRANCO antes de confirmar.');
+            setShowErrorModal(true);
             return;
         }
 
@@ -226,7 +231,8 @@ export const VotacaoPage: React.FC = () => {
             if (isUltimaCategoria) {
                 // Última categoria - registra todos os votos em batch
                 if (!tokenVotacao) {
-                    alert('Token inválido');
+                    setErrorMessage('Token inválido');
+                    setShowErrorModal(true);
                     return;
                 }
                 setVotando(true);
@@ -249,7 +255,9 @@ export const VotacaoPage: React.FC = () => {
         } catch (error) {
             setVotando(false);
             setShowVoteConfirmModal(false);
-            alert('Erro ao registrar voto');
+            const errorMsg = getErrorMessage(error, 'Erro ao registrar voto');
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         }
     };
 
@@ -366,6 +374,19 @@ export const VotacaoPage: React.FC = () => {
                 confirmText="Sim, voltar"
                 cancelText="Cancelar"
                 confirmButtonColor="bg-red-500 hover:bg-red-600"
+            />
+
+            {/* Modal de Erro */}
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => {
+                    setShowErrorModal(false);
+                    if (errorMessage.includes('Erro ao gerar token')) {
+                        navigate('/eleicoes');
+                    }
+                }}
+                title="Erro"
+                message={errorMessage}
             />
         </Layout>
     );
