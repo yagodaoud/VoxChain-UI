@@ -55,9 +55,9 @@ export const HomePage: React.FC = () => {
                             <div className="w-14 h-14 bg-[#E6F1FF] rounded-full flex items-center justify-center mb-4">
                                 <CheckCircle className="text-[#1351B4]" size={28} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3 text-gray-800">2. Vote</h3>
+                            <h3 className="text-xl font-bold mb-3 text-gray-800">2. Gere Token Anônimo</h3>
                             <p className="text-gray-600">
-                                Escolha seus candidatos nas eleições ativas com interface similar à urna eletrônica
+                                Antes de votar, um token anônimo é gerado para garantir o sigilo completo do seu voto
                             </p>
                         </Card>
 
@@ -65,9 +65,9 @@ export const HomePage: React.FC = () => {
                             <div className="w-14 h-14 bg-[#E6F1FF] rounded-full flex items-center justify-center mb-4">
                                 <FileText className="text-[#1351B4]" size={28} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3 text-gray-800">3. Acompanhe</h3>
+                            <h3 className="text-xl font-bold mb-3 text-gray-800">3. Vote com Segurança</h3>
                             <p className="text-gray-600">
-                                Visualize seu comprovante com hash blockchain e verifique a autenticidade
+                                Escolha seus candidatos com interface similar à urna eletrônica. Seu voto é registrado de forma anônima e imutável na blockchain
                             </p>
                         </Card>
                     </div>

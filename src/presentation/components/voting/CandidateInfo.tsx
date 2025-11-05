@@ -23,11 +23,38 @@ export const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidatoSeleciona
     if (candidatoSelecionado) {
         return (
             <div className="bg-white p-4 rounded-lg border-2 border-green-500 shadow-sm">
-                <div className="flex items-center gap-3 mb-1">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <p className="text-lg font-bold text-gray-800">{candidatoSelecionado.nome}</p>
+                <div className="flex items-center gap-4">
+                    {/* Foto do Candidato */}
+                    {candidatoSelecionado.fotoUrl ? (
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-green-500 bg-white flex-shrink-0">
+                            <img 
+                                src={candidatoSelecionado.fotoUrl} 
+                                alt={candidatoSelecionado.nome}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    // Fallback se a imagem não carregar
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center border-2 border-green-600 flex-shrink-0">
+                            <span className="text-white text-xl font-bold">
+                                {candidatoSelecionado.nome.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    )}
+                    
+                    {/* Informações do Candidato */}
+                    <div className="flex-grow">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <p className="text-lg font-bold text-gray-800">{candidatoSelecionado.nome}</p>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-6">{candidatoSelecionado.partido}</p>
+                    </div>
                 </div>
-                <p className="text-sm text-gray-600 ml-6">{candidatoSelecionado.partido}</p>
             </div>
         );
     }

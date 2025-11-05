@@ -3,12 +3,63 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { Eleicao } from '../../domain/eleicao';
 import { ApiService } from '../../data/api/ApiService';
 import type { Candidato } from '../../domain/candidato';
-import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal } from '../components';
+import type { Categoria } from '../../domain/categoria';
+import { Layout, Loading, ElectionHeader, ElectronicBallot, VotingSuccessModal, ConfirmModal, TokenConfirmation } from '../components';
+import { VoteConfirmModal } from '../components/voting/VoteConfirmModal';
+import axios from 'axios';
+
+interface TokenVotacao {
+    tokenAnonimo: string;
+    validoAte: number;
+    eleicaoId: string;
+    usado: boolean;
+}
+
+const getTokenStorageKey = (eleicaoId: string) => `token_votacao_${eleicaoId}`;
+
+const getTokenFromStorage = (eleicaoId: string): TokenVotacao | null => {
+    try {
+        const stored = localStorage.getItem(getTokenStorageKey(eleicaoId));
+        if (!stored) return null;
+        const token: TokenVotacao = JSON.parse(stored);
+        // Verifica se o token ainda é válido (não expirado e não usado)
+        const agora = Date.now();
+        if (token.validoAte < agora || token.usado) {
+            localStorage.removeItem(getTokenStorageKey(eleicaoId));
+            return null;
+        }
+        return token;
+    } catch {
+        return null;
+    }
+};
+
+const saveTokenToStorage = (token: TokenVotacao): void => {
+    try {
+        localStorage.setItem(getTokenStorageKey(token.eleicaoId), JSON.stringify(token));
+    } catch (error) {
+        console.error('Erro ao salvar token no localStorage:', error);
+    }
+};
+
+const markTokenAsUsed = (eleicaoId: string): void => {
+    try {
+        const stored = localStorage.getItem(getTokenStorageKey(eleicaoId));
+        if (stored) {
+            const token: TokenVotacao = JSON.parse(stored);
+            token.usado = true;
+            localStorage.setItem(getTokenStorageKey(eleicaoId), JSON.stringify(token));
+        }
+    } catch (error) {
+        console.error('Erro ao marcar token como usado:', error);
+    }
+};
 
 export const VotacaoPage: React.FC = () => {
     const { eleicaoId } = useParams<{ eleicaoId: string }>();
     const navigate = useNavigate();
     const [eleicao, setEleicao] = useState<Eleicao | null>(null);
+    const [categoriasComCandidatos, setCategoriasComCandidatos] = useState<Categoria[]>([]);
     const [categoriaAtual, setCategoriaAtual] = useState(0);
     const [numeroDigitado, setNumeroDigitado] = useState('');
     const [candidatoSelecionado, setCandidatoSelecionado] = useState<Candidato | null>(null);
@@ -17,18 +68,105 @@ export const VotacaoPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showVoteConfirmModal, setShowVoteConfirmModal] = useState(false);
     const [votando, setVotando] = useState(false);
+    const [tokenVotacao, setTokenVotacao] = useState<string | null>(null);
+    const [tokenValidoAte, setTokenValidoAte] = useState<number>(0);
+    const [gerandoToken, setGerandoToken] = useState(false);
+    const [tokenConfirmado, setTokenConfirmado] = useState(false);
     const api = new ApiService();
 
     useEffect(() => {
-        api.buscarEleicoes().then(eleicoes => {
-            const encontrada = eleicoes.find(e => e.id === eleicaoId);
-            setEleicao(encontrada || null);
-            setLoading(false);
-        });
+        const carregarEleicaoECandidatos = async () => {
+            try {
+                const eleicoes = await api.buscarEleicoes();
+                const encontrada = eleicoes.find(e => e.id === eleicaoId);
+
+                if (!encontrada) {
+                    setEleicao(null);
+                    setLoading(false);
+                    return;
+                }
+
+                setEleicao(encontrada);
+
+                // Buscar candidatos da eleição
+                const candidatos = await api.buscarCandidatosPorEleicao(eleicaoId!);
+
+                // Organizar candidatos por categoria
+                const categorias: Categoria[] = encontrada.categorias.map((categoriaEnum, index) => {
+                    const candidatosDaCategoria = candidatos.filter(
+                        c => c.cargo === categoriaEnum
+                    );
+
+                    return {
+                        id: `${encontrada.id}-${categoriaEnum}-${index}`,
+                        nome: categoriaEnum,
+                        candidatos: candidatosDaCategoria
+                    };
+                });
+
+                setCategoriasComCandidatos(categorias);
+                setLoading(false);
+            } catch (error) {
+                console.error('Erro ao carregar eleição e candidatos:', error);
+                setLoading(false);
+            }
+        };
+
+        carregarEleicaoECandidatos();
     }, [eleicaoId]);
 
-    const categoria = eleicao?.categorias[categoriaAtual];
+    // Gerar token ao carregar
+    useEffect(() => {
+        const gerarToken = async () => {
+            if (!eleicao || tokenVotacao) return;
+
+            // Primeiro, tenta carregar do localStorage
+            const tokenSalvo = getTokenFromStorage(eleicaoId!);
+            if (tokenSalvo) {
+                setTokenVotacao(tokenSalvo.tokenAnonimo);
+                setTokenValidoAte(tokenSalvo.validoAte);
+                return;
+            }
+
+            setGerandoToken(true);
+            try {
+                const { tokenAnonimo, validoAte } = await api.gerarTokenVotacao(eleicaoId!);
+                const novoToken: TokenVotacao = {
+                    tokenAnonimo,
+                    validoAte,
+                    eleicaoId: eleicaoId!,
+                    usado: false
+                };
+                saveTokenToStorage(novoToken);
+                setTokenVotacao(tokenAnonimo);
+                setTokenValidoAte(validoAte);
+            } catch (error) {
+                // Se der erro 409, tenta usar token do localStorage
+                if (axios.isAxiosError(error) && error.response?.status === 409) {
+                    const tokenSalvo = getTokenFromStorage(eleicaoId!);
+                    if (tokenSalvo) {
+                        setTokenVotacao(tokenSalvo.tokenAnonimo);
+                        setTokenValidoAte(tokenSalvo.validoAte);
+                        setGerandoToken(false);
+                        return;
+                    }
+                }
+                // Se não conseguiu usar token do localStorage, mostra erro
+                alert('Erro ao gerar token. Você já pode ter votado nesta eleição.');
+                navigate('/eleicoes');
+            } finally {
+                setGerandoToken(false);
+            }
+        };
+
+        if (eleicao) {
+            gerarToken();
+        }
+    }, [eleicao]);
+
+    const categoria = categoriasComCandidatos[categoriaAtual];
 
     const handleDigito = (digito: string) => {
         if (numeroDigitado.length < 2) {
@@ -56,7 +194,7 @@ export const VotacaoPage: React.FC = () => {
         setVotandoEmBranco(true);
     };
 
-    const handleConfirma = async () => {
+    const handleConfirma = () => {
         if (!categoria) return;
 
         // Valida se um voto foi selecionado (candidato ou branco)
@@ -65,9 +203,14 @@ export const VotacaoPage: React.FC = () => {
             return;
         }
 
-        try {
-            if (!eleicaoId) return;
+        // Mostra modal de confirmação antes de prosseguir
+        setShowVoteConfirmModal(true);
+    };
 
+    const handleConfirmarVoto = async () => {
+        if (!categoria || !eleicaoId) return;
+
+        try {
             // Determina o número do voto (candidato ou branco)
             const numeroVoto = votandoEmBranco ? 'BRANCO' : (candidatoSelecionado ? numeroDigitado : 'BRANCO');
 
@@ -77,22 +220,35 @@ export const VotacaoPage: React.FC = () => {
             setVotosTemporarios(novosVotos);
 
             // Verifica se é a última categoria
-            const totalCategorias = eleicao?.categorias.length || 0;
+            const totalCategorias = categoriasComCandidatos.length;
             const isUltimaCategoria = categoriaAtual >= totalCategorias - 1;
 
             if (isUltimaCategoria) {
                 // Última categoria - registra todos os votos em batch
+                if (!tokenVotacao) {
+                    alert('Token inválido');
+                    return;
+                }
                 setVotando(true);
-                await api.registrarVotosBatch(eleicaoId, novosVotos);
+                setShowVoteConfirmModal(false);
+                await api.registrarVotosBatch(tokenVotacao, eleicaoId, novosVotos);
+                // Marca o token como usado após sucesso
+                markTokenAsUsed(eleicaoId);
                 setVotando(false);
                 setShowSuccessModal(true);
             } else {
                 // Não é a última categoria - apenas avança
-                setCategoriaAtual(categoriaAtual + 1);
-                handleCorrige();
+                setShowVoteConfirmModal(false);
+                const novaCategoria = categoriaAtual + 1;
+                setCategoriaAtual(novaCategoria);
+                // Reset para a próxima categoria
+                setNumeroDigitado('');
+                setCandidatoSelecionado(null);
+                setVotandoEmBranco(false);
             }
         } catch (error) {
             setVotando(false);
+            setShowVoteConfirmModal(false);
             alert('Erro ao registrar voto');
         }
     };
@@ -114,11 +270,11 @@ export const VotacaoPage: React.FC = () => {
         navigate('/eleicoes');
     };
 
-    if (loading) {
+    if (loading || gerandoToken) {
         return (
             <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/eleicoes" backLabel="Voltar às Eleições">
                 <div className="max-w-4xl mx-auto px-4 py-8">
-                    <Loading text="Carregando eleição..." />
+                    <Loading text={gerandoToken ? "Gerando token anônimo..." : "Carregando eleição..."} />
                 </div>
             </Layout>
         );
@@ -131,6 +287,19 @@ export const VotacaoPage: React.FC = () => {
                     <div className="text-center">
                         <h1 className="text-2xl font-bold text-gray-800 mb-4">Eleição não encontrada</h1>
                     </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (tokenVotacao && !tokenConfirmado) {
+        return (
+            <Layout className="bg-[#F8F9FA]" showBackButton={true} backPath="/eleicoes" backLabel="Voltar às Eleições">
+                <div className="max-w-4xl mx-auto px-4 py-8">
+                    <TokenConfirmation
+                        tokenValidoAte={tokenValidoAte}
+                        onContinuar={() => setTokenConfirmado(true)}
+                    />
                 </div>
             </Layout>
         );
@@ -163,10 +332,21 @@ export const VotacaoPage: React.FC = () => {
                     onConfirma={handleConfirma}
                     onBranco={handleBranco}
                     votando={votando}
-                    isUltimaCategoria={eleicao?.categorias ? categoriaAtual >= eleicao.categorias.length - 1 : false}
+                    isUltimaCategoria={categoriasComCandidatos.length > 0 ? categoriaAtual >= categoriasComCandidatos.length - 1 : false}
                     canConfirm={votandoEmBranco || !!candidatoSelecionado}
                 />
             </div>
+
+            {/* Modal de Confirmação de Voto */}
+            <VoteConfirmModal
+                isOpen={showVoteConfirmModal}
+                onClose={() => setShowVoteConfirmModal(false)}
+                onConfirm={handleConfirmarVoto}
+                candidato={candidatoSelecionado}
+                votandoEmBranco={votandoEmBranco}
+                categoriaNome={categoria?.nome || ''}
+                isUltimaCategoria={categoriasComCandidatos.length > 0 ? categoriaAtual >= categoriasComCandidatos.length - 1 : false}
+            />
 
             {/* Modal de Sucesso */}
             <VotingSuccessModal

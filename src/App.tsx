@@ -5,7 +5,6 @@ import { HomePage } from '../src/presentation/pages/home'
 import { LoginPage } from '../src/presentation/pages/login'
 import { VotacaoPage } from '../src/presentation/pages/votacao'
 import { EleicoesPage } from '../src/presentation/pages/eleicoes'
-import { MeusVotosPage } from '../src/presentation/pages/meus-votos'
 import { AdminDashboardPage } from '../src/presentation/pages/admin/dashboard'
 import { AdminEleicoesPage } from '../src/presentation/pages/admin/eleicoes'
 import { CriarEleicaoPage } from '../src/presentation/pages/admin/eleicoes/criar'
@@ -54,14 +53,6 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <VotacaoPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/meus-votos"
-                    element={
-                        <ProtectedRoute>
-                            <MeusVotosPage />
                         </ProtectedRoute>
                     }
                 />

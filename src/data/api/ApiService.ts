@@ -1,12 +1,12 @@
 import type { Usuario } from '../../domain/usuario';
 import type { Eleicao } from '../../domain/eleicao';
 import type { Candidato } from '../../domain/candidato';
-import type { Voto } from '../../domain/voto';
 import { AuthService } from './services/AuthService';
 import { ElectionsService } from './services/ElectionsService';
 import { CandidatesService } from './services/CandidatesService';
 import { VotesService } from './services/VotesService';
 import { VotersService } from './services/VotersService';
+import { TokenService } from './services/TokenService';
 
 export class ApiService {
     private readonly baseUrl = '/api/v1';
@@ -16,6 +16,7 @@ export class ApiService {
     private readonly candidates: CandidatesService;
     private readonly votes: VotesService;
     private readonly voters: VotersService;
+    private readonly tokens: TokenService;
 
     constructor() {
         const getHeaders = this.getAuthHeaders.bind(this);
@@ -24,6 +25,7 @@ export class ApiService {
         this.candidates = new CandidatesService(this.baseUrl, getHeaders);
         this.votes = new VotesService();
         this.voters = new VotersService(this.baseUrl, getHeaders);
+        this.tokens = new TokenService(this.baseUrl, getHeaders);
     }
 
     private getAuthHeaders(): Record<string, string> {
@@ -77,21 +79,18 @@ export class ApiService {
         return this.candidates.deletar(id);
     }
 
+    // Tokens
+    gerarTokenVotacao(eleicaoId: string): Promise<{ tokenAnonimo: string; validoAte: number }> {
+        return this.tokens.gerarToken(eleicaoId);
+    }
+
     // Votos
-    buscarMeusVotos(cpf: string): Promise<Voto[]> {
-        return this.votes.buscarMeusVotos(cpf) as Promise<Voto[]>;
+    registrarVoto(tokenVotacao: string, numeroCandidato: string, eleicaoId: string): Promise<string> {
+        return this.votes.registrarVoto(tokenVotacao, numeroCandidato, eleicaoId);
     }
 
-    buscarVotos(): Promise<Voto[]> {
-        return this.votes.buscarVotos() as Promise<Voto[]>;
-    }
-
-    registrarVoto(eleicaoId: string, categoriaId: string, numeroVoto: string): Promise<string> {
-        return this.votes.registrarVoto(eleicaoId, categoriaId, numeroVoto);
-    }
-
-    registrarVotosBatch(eleicaoId: string, votos: Array<{ categoriaId: string, numeroVoto: string }>): Promise<string> {
-        return this.votes.registrarVotosBatch(eleicaoId, votos);
+    registrarVotosBatch(tokenVotacao: string, eleicaoId: string, votos: Array<{ categoriaId: string, numeroVoto: string }>): Promise<string> {
+        return this.votes.registrarVotosBatch(tokenVotacao, eleicaoId, votos);
     }
 
     // Eleitores

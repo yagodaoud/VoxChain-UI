@@ -14,9 +14,6 @@ export const SubHeader: React.FC<SubHeaderProps> = ({ className = '' }) => {
         if (path === '/eleicoes') {
             return location.pathname === '/eleicoes';
         }
-        if (path === '/meus-votos') {
-            return location.pathname === '/meus-votos';
-        }
         return false;
     };
 
@@ -38,12 +35,6 @@ export const SubHeader: React.FC<SubHeaderProps> = ({ className = '' }) => {
                         className={getButtonClasses('/eleicoes')}
                     >
                         Eleições
-                    </button>
-                    <button
-                        onClick={() => navigate('/meus-votos')}
-                        className={getButtonClasses('/meus-votos')}
-                    >
-                        Meus Votos
                     </button>
                 </div>
             </div>
