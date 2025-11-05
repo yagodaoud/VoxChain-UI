@@ -77,6 +77,7 @@ export const VotacaoPage: React.FC = () => {
     const [tokenConfirmado, setTokenConfirmado] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [jaVotou, setJaVotou] = useState(false);
     const api = new ApiService();
 
     useEffect(() => {
@@ -155,6 +156,12 @@ export const VotacaoPage: React.FC = () => {
                         setGerandoToken(false);
                         return;
                     }
+                    // Se não há token salvo e deu 409, significa que já votou
+                    setJaVotou(true);
+                    setErrorMessage('Você já votou nesta eleição. Não é possível votar novamente.');
+                    setShowErrorModal(true);
+                    setGerandoToken(false);
+                    return;
                 }
                 // Se não conseguiu usar token do localStorage, mostra erro
                 const errorMsg = getErrorMessage(error, 'Erro ao gerar token. Você já pode ter votado nesta eleição.');
@@ -381,7 +388,7 @@ export const VotacaoPage: React.FC = () => {
                 isOpen={showErrorModal}
                 onClose={() => {
                     setShowErrorModal(false);
-                    if (errorMessage.includes('Erro ao gerar token')) {
+                    if (jaVotou) {
                         navigate('/eleicoes');
                     }
                 }}
