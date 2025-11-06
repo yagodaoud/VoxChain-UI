@@ -64,7 +64,7 @@ export const MeusVotosPage: React.FC = () => {
             };
         }
 
-        const hashBloco = voto.hashBlockchain;
+        const hashBloco = voto.blocoHash;
         if (!acc[voto.eleicaoId].blocos[hashBloco]) {
             acc[voto.eleicaoId].blocos[hashBloco] = [];
         }

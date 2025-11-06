@@ -65,7 +65,7 @@ export const VotacaoPage: React.FC = () => {
     const [numeroDigitado, setNumeroDigitado] = useState('');
     const [candidatoSelecionado, setCandidatoSelecionado] = useState<Candidato | null>(null);
     const [votandoEmBranco, setVotandoEmBranco] = useState(false);
-    const [votosTemporarios, setVotosTemporarios] = useState<Array<{ categoriaId: string, numeroVoto: string }>>([]);
+    const [votosTemporarios, setVotosTemporarios] = useState<Array<{ categoria: string, numeroVoto: string }>>([]);
     const [loading, setLoading] = useState(true);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -226,8 +226,8 @@ export const VotacaoPage: React.FC = () => {
             // Determina o número do voto (candidato ou branco)
             const numeroVoto = votandoEmBranco ? 'BRANCO' : (candidatoSelecionado ? numeroDigitado : 'BRANCO');
 
-            // Adiciona o voto ao array temporário
-            const novoVoto = { categoriaId: categoria.id, numeroVoto };
+            // Adiciona o voto ao array temporário (enviamos apenas o cargo da categoria)
+            const novoVoto = { categoria: categoria.nome, numeroVoto };
             const novosVotos = [...votosTemporarios, novoVoto];
             setVotosTemporarios(novosVotos);
 
