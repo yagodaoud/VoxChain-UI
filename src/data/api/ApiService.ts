@@ -1,6 +1,8 @@
 import type { Usuario } from '../../domain/usuario';
 import type { Eleicao } from '../../domain/eleicao';
 import type { Candidato } from '../../domain/candidato';
+import type { Voto } from '../../domain/voto';
+import type { Bloco } from '../../domain/bloco';
 import { AuthService } from './services/AuthService';
 import { ElectionsService } from './services/ElectionsService';
 import { CandidatesService } from './services/CandidatesService';
@@ -108,6 +110,23 @@ export class ApiService {
 
     deletarEleitor(cpfHash: string) {
         return this.voters.deletar(cpfHash);
+    }
+
+    // Votos do usuário e blocos
+    buscarMeusVotos(cpf: string): Promise<Voto[]> {
+        return this.votes.buscarMeusVotos(cpf);
+    }
+
+    buscarBlocoPorHash(hash: string): Promise<Bloco> {
+        return this.votes.buscarBlocoPorHash(hash);
+    }
+
+    validarBloco(hash: string): Promise<{ valido: boolean; mensagem: string }> {
+        return this.votes.validarBloco(hash);
+    }
+
+    buscarVotosPorBloco(hash: string): Promise<Voto[]> {
+        return this.votes.buscarVotosPorBloco(hash);
     }
 }
 
