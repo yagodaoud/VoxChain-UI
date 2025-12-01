@@ -20,19 +20,25 @@ export function useAdminStats(cpf?: string): AdminStatsState {
 
         const load = async (): Promise<void> => {
             try {
-                const [elections, votes, candidates] = await Promise.all([
+                const [elections, candidates] = await Promise.all([
                     service.buscarEleicoes(),
-                    service.buscarVotos(),
                     service.buscarCandidatos(),
                 ]);
 
                 if (isCancelled) return;
 
+                // Buscar total de votos de todas as eleições
+                const resultsPromises = elections.map(e => 
+                    service.buscarResultados(e.id).catch(() => ({ totalVotos: 0 } as any))
+                );
+                const results = await Promise.all(resultsPromises);
+                const totalVotes = results.reduce((acc, curr) => acc + (curr.totalVotos || 0), 0);
+
                 const active = elections.filter(e => e.status === 'ativa').length;
 
                 setActiveElectionsCount(active);
                 setTotalCandidatesCount(candidates.length);
-                setTotalVotesCount(votes.length);
+                setTotalVotesCount(totalVotes);
             } finally {
                 if (!isCancelled) setIsLoading(false);
             }
