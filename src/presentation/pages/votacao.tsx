@@ -96,6 +96,7 @@ export const VotacaoPage: React.FC = () => {
 
                 // Buscar candidatos da eleição
                 const candidatos = await api.buscarCandidatosPorEleicao(eleicaoId!);
+                console.log('Todos os candidatos carregados da API:', candidatos);
 
                 // Organizar candidatos por categoria
                 const categorias: Categoria[] = encontrada.categorias.map((categoriaEnum, index) => {
@@ -186,6 +187,8 @@ export const VotacaoPage: React.FC = () => {
             setVotandoEmBranco(false); // Reset voto em branco quando digita
 
             if (novoNumero.length === 2) {
+                console.log(`Procurando candidato número: ${novoNumero} na categoria: ${categoria?.nome}`);
+                console.log('Candidatos disponíveis nesta categoria:', categoria?.candidatos);
                 const candidato = categoria?.candidatos.find(c => c.numero === novoNumero);
                 setCandidatoSelecionado(candidato || null);
             }
@@ -227,7 +230,7 @@ export const VotacaoPage: React.FC = () => {
             const numeroVoto = votandoEmBranco ? 'BRANCO' : (candidatoSelecionado ? numeroDigitado : 'BRANCO');
 
             // Adiciona o voto ao array temporário
-            const novoVoto = { categoriaId: categoria.id, numeroVoto };
+            const novoVoto = { categoriaId: categoria.nome, numeroVoto };
             const novosVotos = [...votosTemporarios, novoVoto];
             setVotosTemporarios(novosVotos);
 
