@@ -35,8 +35,8 @@ export const ElectionTimer: React.FC<ElectionTimerProps> = ({
     }, [dataInicio, dataFim, status]);
 
     const formatarTempo = () => {
-        const { anos, meses, dias, horas, minutos } = tempoRestante;
-
+        const { anos, meses, dias, horas, minutos, segundos } = tempoRestante;
+        console.log(tempoRestante)
         if (anos > 0) {
             return `${anos}a ${meses}M ${dias}d`;
         } else if (meses > 0) {
@@ -47,6 +47,8 @@ export const ElectionTimer: React.FC<ElectionTimerProps> = ({
             return `${horas}h ${minutos}m`;
         } else if (minutos > 0) {
             return `${minutos}m`;
+        } else if (segundos > 0) {
+            return `${segundos}s`;
         } else {
             return 'Finalizado';
         }
