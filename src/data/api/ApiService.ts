@@ -4,9 +4,9 @@ import type { Candidato } from '../../domain/candidato';
 import type { Voto } from '../../domain/voto';
 import type { Bloco } from '../../domain/bloco';
 import { AuthService } from './services/AuthService';
-import { ElectionsService } from './services/ElectionsService';
+import { ElectionsService, type ResultadoEleicao } from './services/ElectionsService';
 import { CandidatesService } from './services/CandidatesService';
-import { VotesService } from './services/VotesService';
+import { VotesService, type BlocoAnonimo } from './services/VotesService';
 import { VotersService } from './services/VotersService';
 import { TokenService } from './services/TokenService';
 
@@ -64,6 +64,10 @@ export class ApiService {
         return this.elections.deletar(id);
     }
 
+    buscarResultados(eleicaoId: string, parcial: boolean = false): Promise<ResultadoEleicao> {
+        return this.elections.buscarResultados(eleicaoId, parcial);
+    }
+
     // Candidatos
     buscarCandidatos(): Promise<Candidato[]> {
         return this.candidates.listar();
@@ -113,7 +117,7 @@ export class ApiService {
     }
 
     // Votos do usuário e blocos
-    buscarMeusVotos(cpf: string): Promise<Voto[]> {
+    buscarMeusVotos(cpf: string): Promise<BlocoAnonimo[]> {
         return this.votes.buscarMeusVotos(cpf);
     }
 
@@ -129,5 +133,3 @@ export class ApiService {
         return this.votes.buscarVotosPorBloco(hash);
     }
 }
-
-

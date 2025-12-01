@@ -2,6 +2,21 @@ import axios from 'axios';
 import type { Voto } from '../../../domain/voto';
 import type { Bloco } from '../../../domain/bloco';
 
+export interface VotoAnonimo {
+    tokenHash: string;
+    eleicaoId: string;
+    tipoCandidato: string;
+    timestamp: Date;
+}
+
+export interface BlocoAnonimo {
+    hash: string;
+    indice: number;
+    timestamp: Date;
+    totalVotos: number;
+    votos: VotoAnonimo[];
+}
+
 export class VotesService {
     private delay(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -42,17 +57,26 @@ export class VotesService {
         }
     }
 
-    async buscarMeusVotos(cpf: string): Promise<Voto[]> {
+    async buscarMeusVotos(cpf: string): Promise<BlocoAnonimo[]> {
         try {
-            const response = await axios.get<{ votos: Voto[] }>('/api/v1/votos/meus-votos', {
+            const response = await axios.get<{ blocos: any[] }>('/api/v1/votos-anonimos/meus-blocos', {
                 params: { cpf }
             });
-            return response.data.votos.map((voto: Voto) => ({
-                ...voto,
-                timestamp: new Date(voto.timestamp)
+            
+            return response.data.blocos.map(bloco => ({
+                hash: bloco.hash,
+                indice: bloco.indice,
+                timestamp: new Date(bloco.timestamp),
+                totalVotos: bloco.totalVotos,
+                votos: bloco.votos.map((voto: any) => ({
+                    tokenHash: voto.tokenHash,
+                    eleicaoId: voto.eleicaoId,
+                    tipoCandidato: voto.tipoCandidato,
+                    timestamp: new Date(voto.timestamp)
+                }))
             }));
         } catch (error) {
-            console.error('Erro ao buscar meus votos:', error);
+            console.error('Erro ao buscar meus blocos:', error);
             throw error;
         }
     }

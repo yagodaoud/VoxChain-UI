@@ -1,6 +1,5 @@
 import axios from 'axios';
-import type { Eleicao } from '../../../domain/eleicao';
-import type { Categoria } from '../../../domain/categoria';
+import { Eleicao } from '../../../domain/eleicao';
 import { CategoriaEleicao } from '../../../domain/categoria';
 
 interface CriarEleicaoRequest {
@@ -22,8 +21,8 @@ export class ElectionsService {
 
     private mapApiToDomain(eleicao: Eleicao): Eleicao {
         const agora = new Date();
-        const dataInicio = new Date(eleicao.dataInicio * 1000);
-        const dataFim = new Date(eleicao.dataFim * 1000);
+        const dataInicio = new Date(eleicao.dataInicio);
+        const dataFim = new Date(eleicao.dataFim);
 
         eleicao.dataInicioDate = dataInicio;
         eleicao.dataFimDate = dataFim;
@@ -59,8 +58,8 @@ export class ElectionsService {
             nome: eleicao.nome,
             descricao: eleicao.descricao,
             categorias: this.categoriasParaEnumStrings(eleicao.categorias),
-            dataInicio: Math.floor(eleicao.dataInicio / 1000),
-            dataFim: Math.floor(eleicao.dataFim / 1000)
+            dataInicio: eleicao.dataInicio,
+            dataFim: eleicao.dataFim
         };
 
         try {
@@ -119,6 +118,55 @@ export class ElectionsService {
 
         return null;
     }
+
+    async buscarResultados(eleicaoId: string, parcial: boolean = false): Promise<ResultadoEleicao> {
+        try {
+            const endpoint = parcial 
+                ? `${this.baseUrl}/resultados/${eleicaoId}/parcial`
+                : `${this.baseUrl}/resultados/${eleicaoId}`;
+            
+            const response = await axios.get<ResultadoEleicao>(endpoint);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar resultados:', error);
+            throw error;
+        }
+    }
 }
 
+export interface ResultadoCandidato {
+    candidatoId: string;
+    nome: string;
+    numero: string;
+    partido: string;
+    votos: number;
+    porcentagem: number;
+    eleito?: boolean;
+}
 
+export interface ResultadoCargo {
+    cargo: string;
+    totalVotos: number;
+    votosValidos: number;
+    votosBrancos: number;
+    votosNulos: number;
+    candidatos: ResultadoCandidato[];
+}
+
+export interface CandidatoResultado {
+    nome: string;
+    numero: string;
+    partido: string;
+    votos: number;
+    percentual: string;
+}
+
+export interface ResultadoEleicao {
+    eleicaoId: string;
+    nomeEleicao?: string;
+    status?: string;
+    totalVotos: number;
+    vencedor?: CandidatoResultado;
+    candidatos?: CandidatoResultado[];
+    resultadosPorCargo?: Record<string, ResultadoCargo>;
+}

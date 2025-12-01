@@ -1,33 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, Users, Hash, CheckCircle2, XCircle, RefreshCw, Search, Copy, ShieldCheck } from 'lucide-react';
+import { FileText, Users, Hash, CheckCircle2, XCircle, RefreshCw, Copy, ShieldCheck, Info } from 'lucide-react';
 import { ApiService } from '../../data/api/ApiService';
 import { useAuth } from '../../contexts/AuthContext';
-import type { Voto } from '../../domain/voto';
-import { Layout, Loading, EmptyState, Card, SubHeader, SectionHeader, Accordion, ErrorModal } from '../components';
-import { formatarDataBrasileira } from '../../utils/dateUtils';
+import type { BlocoAnonimo } from '../../data/api/services/VotesService';
+import { Layout, Loading, EmptyState, Card, SubHeader, SectionHeader, ErrorModal } from '../components';
+import { formatarDataBrasileira, formatarDataHoraBrasileira } from '../../utils/dateUtils';
 import { getErrorMessage } from '../../utils/errorUtils';
 
-interface VotosPorBloco {
-    [hash: string]: Voto[];
-}
-
-interface VotosPorEleicao {
-    [eleicaoId: string]: {
-        eleicaoNome: string;
-        blocos: VotosPorBloco;
-        dataVotacao: Date;
-    };
-}
-
 export const MeusVotosPage: React.FC = () => {
-    const [votos, setVotos] = useState<Voto[]>([]);
+    const [blocos, setBlocos] = useState<BlocoAnonimo[]>([]);
     const [loading, setLoading] = useState(true);
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const [blocosExpandidos, setBlocosExpandidos] = useState<Record<string, boolean>>({});
     const [validando, setValidando] = useState<Record<string, boolean>>({});
     const [validacoes, setValidacoes] = useState<Record<string, { valido: boolean; mensagem: string }>>({});
-    const [carregandoBloco, setCarregandoBloco] = useState<Record<string, boolean>>({});
-    const [votosDoBloco, setVotosDoBloco] = useState<Record<string, Voto[]>>({});
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const { usuario } = useAuth();
@@ -35,18 +19,18 @@ export const MeusVotosPage: React.FC = () => {
 
     useEffect(() => {
         if (usuario) {
-            loadVotos();
+            loadBlocos();
         }
     }, [usuario]);
 
-    const loadVotos = async () => {
+    const loadBlocos = async () => {
         setLoading(true);
         try {
             const data = await api.buscarMeusVotos(usuario!.cpf);
-            setVotos(data);
+            setBlocos(data);
         } catch (error) {
-            console.error('Erro ao buscar votos:', error);
-            const errorMsg = getErrorMessage(error, 'Erro ao carregar seus votos');
+            console.error('Erro ao buscar blocos:', error);
+            const errorMsg = getErrorMessage(error, 'Erro ao carregar histórico de votação');
             setErrorMessage(errorMsg);
             setShowErrorModal(true);
         } finally {
@@ -54,36 +38,8 @@ export const MeusVotosPage: React.FC = () => {
         }
     };
 
-    // Agrupar votos por eleição e depois por bloco
-    const votosPorEleicao: VotosPorEleicao = votos.reduce((acc, voto) => {
-        if (!acc[voto.eleicaoId]) {
-            acc[voto.eleicaoId] = {
-                eleicaoNome: voto.eleicaoNome,
-                blocos: {},
-                dataVotacao: voto.timestamp
-            };
-        }
-
-        const hashBloco = voto.hashBlockchain;
-        if (!acc[voto.eleicaoId].blocos[hashBloco]) {
-            acc[voto.eleicaoId].blocos[hashBloco] = [];
-        }
-        acc[voto.eleicaoId].blocos[hashBloco].push(voto);
-
-        return acc;
-    }, {} as VotosPorEleicao);
-
-    const toggleExpand = (eleicaoId: string) => {
-        setExpanded(prev => ({ ...prev, [eleicaoId]: !prev[eleicaoId] }));
-    };
-
-    const toggleBlocoExpandido = (hash: string) => {
-        setBlocosExpandidos(prev => ({ ...prev, [hash]: !prev[hash] }));
-    };
-
     const copiarHash = (hash: string) => {
         navigator.clipboard.writeText(hash);
-        // Poderia adicionar um toast aqui
     };
 
     const handleValidarBloco = async (hash: string) => {
@@ -105,31 +61,6 @@ export const MeusVotosPage: React.FC = () => {
         }
     };
 
-    const handleBuscarVotosBloco = async (hash: string) => {
-        if (votosDoBloco[hash]) {
-            // Se já carregou, apenas expande/colapsa
-            toggleBlocoExpandido(hash);
-            return;
-        }
-
-        setCarregandoBloco(prev => ({ ...prev, [hash]: true }));
-        try {
-            const votos = await api.buscarVotosPorBloco(hash);
-            setVotosDoBloco(prev => ({ ...prev, [hash]: votos }));
-            setBlocosExpandidos(prev => ({ ...prev, [hash]: true }));
-        } catch (error) {
-            console.error('Erro ao buscar votos do bloco:', error);
-            const errorMsg = getErrorMessage(error, 'Erro ao buscar votos do bloco');
-            setErrorMessage(errorMsg);
-            setShowErrorModal(true);
-        } finally {
-            setCarregandoBloco(prev => ({ ...prev, [hash]: false }));
-        }
-    };
-
-    const getTotalBlocos = (blocos: VotosPorBloco) => Object.keys(blocos).length;
-    const getTotalVotos = (blocos: VotosPorBloco) => Object.values(blocos).reduce((sum, votos) => sum + votos.length, 0);
-
     return (
         <Layout
             showBackButton={true}
@@ -141,206 +72,134 @@ export const MeusVotosPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 py-4">
                 <SectionHeader
                     icon={FileText}
-                    title="Histórico de Votação"
-                    subtitle="Consulte os blocos onde seus votos foram registrados"
+                    title="Histórico de Votação (Anônimo)"
+                    subtitle="Consulte os blocos onde seus votos foram registrados. Para garantir sua privacidade, mostramos todos os votos do bloco."
                 />
 
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+                    <Info className="text-blue-600 shrink-0 mt-0.5" size={20} />
+                    <div className="text-sm text-blue-800">
+                        <p className="font-semibold mb-1">Como funciona a privacidade?</p>
+                        <p>
+                            Seu voto é registrado em um bloco junto com outros votos.
+                            O sistema confirma que seu voto está no bloco, mas não revela qual deles é o seu.
+                            Isso garante que seu voto foi contabilizado sem comprometer seu anonimato.
+                        </p>
+                    </div>
+                </div>
+
                 {loading ? (
-                    <Loading text="Carregando seus votos..." />
-                ) : votos.length === 0 ? (
+                    <Loading text="Carregando histórico..." />
+                ) : blocos.length === 0 ? (
                     <EmptyState
                         icon={FileText}
                         title="Nenhum voto registrado"
-                        description="Você ainda não tem votos registrados"
+                        description="Você ainda não participou de nenhuma votação."
                         className="bg-gray-50 py-24"
                     />
                 ) : (
-                    <div className="space-y-4">
-                        {Object.entries(votosPorEleicao).map(([eleicaoId, dadosEleicao]) => {
-                            const totalBlocos = getTotalBlocos(dadosEleicao.blocos);
-                            const totalVotos = getTotalVotos(dadosEleicao.blocos);
-                            const isOpen = !!expanded[eleicaoId];
+                    <div className="space-y-6">
+                        {blocos.map((bloco) => {
+                            const validacao = validacoes[bloco.hash];
+                            const estaValidando = validando[bloco.hash];
 
                             return (
-                                <Card key={eleicaoId} padding="lg">
-                                    <Accordion
-                                        title={dadosEleicao.eleicaoNome}
-                                        subtitle={
-                                            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar size={14} />
-                                                    {formatarDataBrasileira(dadosEleicao.dataVotacao)}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Hash size={14} />
-                                                    {totalBlocos} bloco{totalBlocos !== 1 ? 's' : ''}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Users size={14} />
-                                                    {totalVotos} voto{totalVotos !== 1 ? 's' : ''}
-                                                </span>
+                                <Card key={bloco.hash} padding="lg" className="border border-gray-200">
+                                    <div className="space-y-4">
+                                        {/* Cabeçalho do Bloco */}
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Hash className="text-[#1351B4]" size={20} />
+                                                    <h3 className="font-bold text-gray-800 text-lg">Bloco #{bloco.indice}</h3>
+                                                    <span className="text-sm text-gray-500">
+                                                        • {formatarDataHoraBrasileira(bloco.timestamp)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="bg-gray-100 p-3 rounded-lg mb-3 font-mono text-xs text-gray-600 break-all flex items-center gap-2 group">
+                                                    <span className="flex-1">{bloco.hash}</span>
+                                                    <button
+                                                        onClick={() => copiarHash(bloco.hash)}
+                                                        className="text-gray-400 hover:text-[#1351B4] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        title="Copiar hash"
+                                                    >
+                                                        <Copy size={14} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                    <span className="flex items-center gap-1">
+                                                        <Users size={16} />
+                                                        {bloco.totalVotos} votos neste bloco
+                                                    </span>
+                                                </div>
                                             </div>
-                                        }
-                                        isOpen={isOpen}
-                                        onToggle={() => toggleExpand(eleicaoId)}
-                                    >
-                                        {totalBlocos === 0 ? (
-                                            <div className="text-center py-6 text-gray-500">
-                                                Nenhum bloco registrado nesta eleição
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-4 mt-4">
-                                                {Object.entries(dadosEleicao.blocos).map(([hash, votosUsuarioNoBloco]) => {
-                                                    const blocoExpandido = !!blocosExpandidos[hash];
-                                                    const validacao = validacoes[hash];
-                                                    const estaValidando = validando[hash];
-                                                    const estaCarregando = carregandoBloco[hash];
-                                                    const votosCarregados = votosDoBloco[hash] || votosUsuarioNoBloco;
 
-                                                    return (
-                                                        <Card key={hash} padding="md" className="border border-gray-200">
-                                                            <div className="space-y-4">
-                                                                {/* Cabeçalho do Bloco */}
-                                                                <div className="flex items-start justify-between">
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2 mb-2">
-                                                                            <Hash className="text-[#1351B4]" size={18} />
-                                                                            <h3 className="font-semibold text-gray-800">Bloco</h3>
-                                                                        </div>
-                                                                        <div className="bg-gray-100 p-3 rounded-lg mb-2">
-                                                                            <p className="text-xs text-gray-600 mb-1 font-medium">Hash do Bloco:</p>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <p className="font-mono text-xs text-gray-800 break-all flex-1">
-                                                                                    {hash}
-                                                                                </p>
-                                                                                <button
-                                                                                    onClick={() => copiarHash(hash)}
-                                                                                    className="text-[#1351B4] hover:text-[#0c3d8a] transition-colors"
-                                                                                    title="Copiar hash"
-                                                                                >
-                                                                                    <Copy size={16} />
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                                            <span>{votosUsuarioNoBloco.length} voto{votosUsuarioNoBloco.length !== 1 ? 's' : ''} neste bloco</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
+                                            <button
+                                                onClick={() => handleValidarBloco(bloco.hash)}
+                                                disabled={estaValidando}
+                                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 rounded-lg transition-colors text-sm font-medium shrink-0"
+                                            >
+                                                {estaValidando ? (
+                                                    <RefreshCw size={16} className="animate-spin" />
+                                                ) : (
+                                                    <ShieldCheck size={16} />
+                                                )}
+                                                {estaValidando ? 'Validando...' : 'Validar Integridade'}
+                                            </button>
+                                        </div>
 
-                                                                {/* Ferramentas do Bloco */}
-                                                                <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
-                                                                    <button
-                                                                        onClick={() => handleValidarBloco(hash)}
-                                                                        disabled={estaValidando}
-                                                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors text-sm font-medium"
-                                                                        title="Validar integridade do bloco"
-                                                                    >
-                                                                        {estaValidando ? (
-                                                                            <RefreshCw size={16} className="animate-spin" />
-                                                                        ) : (
-                                                                            <ShieldCheck size={16} />
-                                                                        )}
-                                                                        {estaValidando ? 'Validando...' : 'Validar Bloco'}
-                                                                    </button>
-
-                                                                    <button
-                                                                        onClick={() => handleBuscarVotosBloco(hash)}
-                                                                        disabled={estaCarregando}
-                                                                        className="flex items-center gap-2 px-4 py-2 bg-[#1351B4] hover:bg-[#0c3d8a] disabled:bg-gray-400 text-white rounded-lg transition-colors text-sm font-medium"
-                                                                        title="Ver todos os votos deste bloco"
-                                                                    >
-                                                                        {estaCarregando ? (
-                                                                            <RefreshCw size={16} className="animate-spin" />
-                                                                        ) : (
-                                                                            <Search size={16} />
-                                                                        )}
-                                                                        {estaCarregando ? 'Carregando...' : 'Ver Votos do Bloco'}
-                                                                    </button>
-                                                                </div>
-
-                                                                {/* Resultado da Validação */}
-                                                                {validacao && (
-                                                                    <div className={`p-3 rounded-lg border ${validacao.valido
-                                                                        ? 'bg-green-50 border-green-200'
-                                                                        : 'bg-red-50 border-red-200'
-                                                                        }`}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            {validacao.valido ? (
-                                                                                <CheckCircle2 className="text-green-600" size={18} />
-                                                                            ) : (
-                                                                                <XCircle className="text-red-600" size={18} />
-                                                                            )}
-                                                                            <span className={`font-medium text-sm ${validacao.valido ? 'text-green-800' : 'text-red-800'
-                                                                                }`}>
-                                                                                {validacao.valido ? 'Bloco Válido' : 'Bloco Inválido'}
-                                                                            </span>
-                                                                        </div>
-                                                                        {validacao.mensagem && (
-                                                                            <p className={`text-xs mt-1 ${validacao.valido ? 'text-green-700' : 'text-red-700'
-                                                                                }`}>
-                                                                                {validacao.mensagem}
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Votos do Bloco (expandido) */}
-                                                                {blocoExpandido && votosCarregados && (
-                                                                    <div className="space-y-3 pt-2 border-t border-gray-200">
-                                                                        <h4 className="font-semibold text-gray-700 text-sm">
-                                                                            Votos no Bloco ({votosCarregados.length})
-                                                                        </h4>
-                                                                        {votosCarregados.map((voto: Voto, idx: number) => (
-                                                                            <div key={idx} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                                                                <div className="flex justify-between items-start">
-                                                                                    <div className="flex-1">
-                                                                                        <h5 className="font-semibold text-gray-800 text-sm mb-1">
-                                                                                            {voto.categoriaNome}
-                                                                                        </h5>
-                                                                                        <p className="text-sm text-gray-600">
-                                                                                            Nº {voto.candidatoNumero} - {voto.candidatoNome}
-                                                                                        </p>
-                                                                                        <p className="text-xs text-gray-500 mt-1">
-                                                                                            {formatarDataBrasileira(voto.timestamp)}
-                                                                                        </p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Votos do Usuário neste Bloco */}
-                                                                <div className="space-y-2 pt-2 border-t border-gray-200">
-                                                                    <h4 className="font-semibold text-gray-700 text-sm">
-                                                                        Seus Votos neste Bloco ({votosUsuarioNoBloco.length})
-                                                                    </h4>
-                                                                    {votosUsuarioNoBloco.map((voto: Voto, idx: number) => (
-                                                                        <div key={idx} className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                                                            <div className="flex justify-between items-start">
-                                                                                <div className="flex-1">
-                                                                                    <h5 className="font-semibold text-gray-800 text-sm mb-1">
-                                                                                        {voto.categoriaNome}
-                                                                                    </h5>
-                                                                                    <p className="text-sm text-gray-600">
-                                                                                        Nº {voto.candidatoNumero} - {voto.candidatoNome}
-                                                                                    </p>
-                                                                                    <p className="text-xs text-gray-500 mt-1">
-                                                                                        {formatarDataBrasileira(voto.timestamp)}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </Card>
-                                                    );
-                                                })}
+                                        {/* Resultado da Validação */}
+                                        {validacao && (
+                                            <div className={`p-3 rounded-lg border ${validacao.valido
+                                                ? 'bg-green-50 border-green-200'
+                                                : 'bg-red-50 border-red-200'
+                                                }`}>
+                                                <div className="flex items-center gap-2">
+                                                    {validacao.valido ? (
+                                                        <CheckCircle2 className="text-green-600" size={18} />
+                                                    ) : (
+                                                        <XCircle className="text-red-600" size={18} />
+                                                    )}
+                                                    <span className={`font-medium text-sm ${validacao.valido ? 'text-green-800' : 'text-red-800'
+                                                        }`}>
+                                                        {validacao.valido ? 'Bloco Válido e Íntegro' : 'Bloco Inválido'}
+                                                    </span>
+                                                </div>
+                                                {validacao.mensagem && (
+                                                    <p className={`text-xs mt-1 ml-6 ${validacao.valido ? 'text-green-700' : 'text-red-700'
+                                                        }`}>
+                                                        {validacao.mensagem}
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
-                                    </Accordion>
+
+                                        {/* Lista de Votos no Bloco */}
+                                        <div className="mt-4 pt-4 border-t border-gray-100">
+                                            <h4 className="font-semibold text-gray-700 text-sm mb-3">
+                                                Votos Registrados no Bloco
+                                            </h4>
+                                            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                                                {bloco.votos.map((voto, idx) => (
+                                                    <div key={idx} className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <span className="font-medium text-gray-800">
+                                                                {voto.tipoCandidato}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">
+                                                                {formatarDataBrasileira(voto.timestamp)}
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 font-mono truncate" title={voto.tokenHash}>
+                                                            Token: {voto.tokenHash}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </Card>
                             );
                         })}

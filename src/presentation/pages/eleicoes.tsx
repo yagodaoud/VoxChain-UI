@@ -68,12 +68,27 @@ export const EleicoesPage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {eleicao.status === 'ativa' && (
-                                    <GovButton onClick={() => navigate(`/votar/${eleicao.id}`)}>
-                                        Votar Agora
-                                        <ChevronRight size={18} />
-                                    </GovButton>
-                                )}
+                                <div className="flex gap-3 mt-4">
+                                    {eleicao.status === 'ativa' && (
+                                        <GovButton onClick={() => navigate(`/votar/${eleicao.id}`)}>
+                                            Votar Agora
+                                            <ChevronRight size={18} />
+                                        </GovButton>
+                                    )}
+
+                                    {(eleicao.status === 'ativa' || eleicao.status === 'encerrada') && (
+                                        <button
+                                            onClick={() => navigate(`/resultados/${eleicao.id}`)}
+                                            className={`px-6 py-3 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${eleicao.status === 'ativa'
+                                                    ? 'bg-white text-[#1351B4] border border-[#1351B4] hover:bg-blue-50'
+                                                    : 'bg-[#1351B4] text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
+                                                }`}
+                                        >
+                                            {eleicao.status === 'ativa' ? 'Acompanhar Parcial' : 'Ver Resultados'}
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    )}
+                                </div>
                             </Card>
                         ))}
                     </div>
